@@ -1,0 +1,33 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
+<link rel="stylesheet" type="text/css" href="xtse.css">
+<title>SCRYPT</title>
+</head>
+<body>
+<script src="sjcl.min.js"></script>
+<script src="scrypt.js"></script>
+<script>
+function trim(str) {
+  return str.replace(/^\s\s*/,'').replace(/\s\s*$/,'');
+}
+function submit() {
+  var pass = document.getElementById("pass");
+  var salt = document.getElementById("salt");
+  var hash = document.getElementById("hash");
+  hash.value = "";
+  setTimeout(function(){hash.value = sjcl.codec.hex.fromBits(sjcl.misc.scrypt(trim(pass.value),trim(salt.value),16384));},100);
+}
+</script>
+<textarea id="pass" rows="2"></textarea>
+<br><br>
+<textarea id="salt" rows="2"></textarea>
+<br><br>
+<button onclick="submit()" type="button">SCRYPT</button>
+<br><br>
+<textarea id="hash" readonly rows="2"></textarea>
+<br>
+</body>
+</html>

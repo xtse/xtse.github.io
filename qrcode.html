@@ -1,0 +1,31 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
+<link rel="stylesheet" type="text/css" href="xtse.css">
+<title>QR Code</title>
+</head>
+<body>
+<script src="qrcode.min.js"></script>
+<script>
+var qrcode;
+function submit() {
+  if(!qrcode) {
+    qrcode = new QRCode(document.getElementById("qrcode"), {
+      correctLevel: QRCode.CorrectLevel.L,
+      height: 480,
+      margin: 20,
+      width: 480
+    });
+  }
+  qrcode.clear();
+  qrcode.makeCode(document.getElementById("text").value);
+}
+</script>
+<textarea id="text" onkeyup="submit()" rows="2"></textarea>
+<br><br>
+<table><tr><td><div id="qrcode"></div></td></tr></table>
+<br>
+</body>
+</html>

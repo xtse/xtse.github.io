@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
+<link rel="stylesheet" type="text/css" href="xtse.css">
+<title>links</title>
+</head>
+<body>
+<script src="sjcl.min.js"></script>
+<script src="scrypt.js"></script>
+<script>
+
+var done = false;
+
+function generate()
+{
+  if(done === true) return;
+
+  var pass = document.getElementById("pass").value;
+  var salt1 = location.href.split("?")[1].split("=")[0];
+  var salt2 = "3f2cae25aa3089a72c1fe3dc09a0766f";
+  var salt = salt1+salt2;
+  var saltHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(salt));
+  if(saltHash.indexOf("cecdf20d010a872b94226fad6cd22ac4") != 0) return;
+  var key = sjcl.codec.hex.fromBits(sjcl.misc.scrypt(pass,salt));
+  var sitesEncryptedHex = location.href.split("?")[1].split("=")[1];
+  var sitesEncryptedBits = sjcl.codec.hex.toBits(sitesEncryptedHex);
+  var sitesEncrypted = sjcl.codec.utf8String.fromBits(sitesEncryptedBits);
+  var sites = sjcl.decrypt(key,sitesEncrypted);
+  var links = sites.split("\n");
+
+  done = true;
+
+  for(var i = 0; i < links.length; i++)
+  {
+    var link = links[i];
+    if(link.charAt(0) == '#') continue;
+    var dotIndexEnd = link.lastIndexOf(".");
+    var dotIndexBegin = link.lastIndexOf(".",dotIndexEnd-1);
+    var a = document.createElement("a");
+    a.setAttribute("href","redirect.html?https://"+link);
+    a.setAttribute("target","_blank");
+    a.innerHTML = link.substring(dotIndexBegin+1,dotIndexEnd);
+    document.body.appendChild(a);
+    document.body.appendChild(document.createTextNode(" . "));
+  }
+}
+
+</script>
+<input id="pass" onkeydown="if(event.keyCode==13){generate();}" size="20" type="text" value=""></input>
+<script>document.getElementById("pass").focus();</script>
+<br><br>
+</body>
+</html>

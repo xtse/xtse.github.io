@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
+<link rel="stylesheet" type="text/css" href="xtse.css">
+<title>AES</title>
+</head>
+<body>
+<script src="sjcl.min.js"></script>
+<script>
+function trim(str) {
+  return str.replace(/^\s\s*/,'').replace(/\s\s*$/,'');
+}
+function submit() {
+  var text = document.getElementById("text");
+  var pass = document.getElementById("pass");
+  var data = document.getElementById("data");
+  data.value = "";
+  if(text.value.indexOf('{"iv":') == 0) {
+    setTimeout(function(){data.value = sjcl.decrypt(trim(pass.value),trim(text.value));},100);
+  }
+  else {
+    setTimeout(function(){data.value = sjcl.encrypt(trim(pass.value),trim(text.value),{iter:10000,ks:256});},100);
+  }
+}
+</script>
+<textarea id="text" rows="2"></textarea>
+<br><br>
+<textarea id="pass" rows="2"></textarea>
+<br><br>
+<button onclick="submit()" type="button">AES</button>
+<br><br>
+<textarea id="data" readonly rows="2"></textarea>
+<br>
+</body>
+</html>

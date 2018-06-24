@@ -1,0 +1,35 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
+<link rel="stylesheet" type="text/css" href="xtse.css">
+<title>PBKDF2</title>
+</head>
+<body>
+<script src="sjcl.min.js"></script>
+<script>
+function trim(str) {
+  return str.replace(/^\s\s*/,'').replace(/\s\s*$/,'');
+}
+function submit() {
+  var pass = document.getElementById("pass");
+  var salt = document.getElementById("salt");
+  var cost = document.getElementById("cost");
+  var hash = document.getElementById("hash");
+  hash.value = "";
+  setTimeout(function(){hash.value = sjcl.codec.hex.fromBits(sjcl.misc.pbkdf2(trim(pass.value),trim(salt.value),parseInt(trim(cost.value))));},100);
+}
+</script>
+<textarea id="pass" rows="2"></textarea>
+<br><br>
+<textarea id="salt" rows="2"></textarea>
+<br><br>
+<input id="cost" type="text" value="10000"></input>
+<br><br>
+<button onclick="submit()" type="button">PBKDF2</button>
+<br><br>
+<textarea id="hash" readonly rows="2"></textarea>
+<br>
+</body>
+</html>

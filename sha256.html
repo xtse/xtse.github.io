@@ -1,0 +1,28 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
+<link rel="stylesheet" type="text/css" href="xtse.css">
+<title>SHA-256</title>
+</head>
+<body>
+<script src="sjcl.min.js"></script>
+<script>
+function trim(str) {
+  return str.replace(/^\s\s*/,'').replace(/\s\s*$/,'');
+}
+function submit() {
+  var text = document.getElementById("text");
+  var hash = document.getElementById("hash");
+  hash.value = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(trim(text.value)));
+}
+</script>
+<textarea id="text" rows="2"></textarea>
+<br><br>
+<button onclick="submit()" type="button">SHA-256</button>
+<br><br>
+<textarea id="hash" readonly rows="2"></textarea>
+<br>
+</body>
+</html>
