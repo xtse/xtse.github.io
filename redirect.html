@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>var config = new Object();</script>
+<script src="redirect.js"></script>
+<script>
+let index = window.location.href.indexOf("?");
+if (index > 0) {
+  let query = window.location.href.substring(index + 1);
+  if (query.indexOf("redirect_page") == -1 || query.indexOf("redirect_append") == -1) {
+    window.location.assign(decodeURIComponent(query));
+  }
+  else {
+    let params = new URLSearchParams(window.location.search);
+    let url = params.get("redirect_page") + "?";
+    let appendParamName = params.get("redirect_append");
+    let appendParamValue = params.get(appendParamName) === null ? "" : params.get(appendParamName);
+    let configValue = config[appendParamName] === undefined ? "" : config[appendParamName];
+    params.delete("redirect_page");
+    params.delete("redirect_append");
+    params.delete(appendParamName);
+    for (let k of params.keys()) {
+      url = url + k + "=" + params.get(k) + "&";
+    }
+    url = url + appendParamName + "=" + appendParamValue + configValue;
+    window.location = url;
+  }
+}
+</script>
+</head>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width">
+<script>
+
+/* bin.js 2023-09-22 */
+
+var bin=new bintools;function bintools(){}bintools.prototype.assert=function(assertion){if(!(assertion===true)){console.trace();throw"ERROR"}};bintools.prototype.toHex=function(arr){this.assert(arr instanceof Uint8Array);return arr.reduce(((hex,b)=>hex+b.toString(16).padStart(2,"0")),"")};bintools.prototype.fromHex=function(txt){this.assert(typeof txt==="string");let hex=txt.replace(/[^a-fA-f0-9]/g,"");this.assert(hex.length%2==0);return new Uint8Array(hex.match(/.{1,2}/g).map((b=>parseInt(b,16))))};bintools.prototype.toBase64=function(arr){this.assert(arr instanceof Uint8Array);return btoa(this.toString(arr))};bintools.prototype.fromBase64=function(txt){this.assert(typeof txt==="string");return this.fromString(atob(txt))};bintools.prototype.toSafeBase64=function(arr){this.assert(arr instanceof Uint8Array);return this.toBase64(arr).replace(/\//g,"_").replace(/\+/g,"-").replace(/\=/g,"")};bintools.prototype.fromSafeBase64=function(txt){this.assert(typeof txt==="string");return this.fromBase64(txt.replace(/_/g,"/").replace(/-/g,"+"))};bintools.prototype.toString=function(arr){this.assert(arr instanceof Uint8Array);let result="";for(let i=0;i<arr.length;i++)result+=String.fromCharCode(arr[i]);return result};bintools.prototype.fromString=function(txt){this.assert(typeof txt==="string");return new Uint8Array(txt.split("").map((s=>s.charCodeAt(0))))};bintools.prototype.getRandomBytes=function(size){this.assert(typeof size==="number"&&size>0);let randomBytes=new Uint8Array(size);if(size<=65536){window.crypto.getRandomValues(randomBytes)}else{let buf=new Uint8Array(65536);let bufIndex=0;window.crypto.getRandomValues(buf);for(let i=0;i<size;i++){if(bufIndex==buf.length){bufIndex=0;window.crypto.getRandomValues(buf)}randomBytes[i]=buf[bufIndex];bufIndex++}}return randomBytes};bintools.prototype.getRandomGuid=function(){let s=this.toHex(this.getRandomBytes(16));return s.substring(0,8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20)};bintools.prototype.xor=function(...baArray){this.assert(baArray.length>1);let length=-1;for(let ba of baArray){if(length==-1)length=ba.length;this.assert(ba instanceof Uint8Array);this.assert(ba.length==length)}let result=new Uint8Array(length);let ba=baArray[0];for(let i=0;i<length;i++)result[i]=ba[i];for(let i=1;i<baArray.length;i++){ba=baArray[i];for(let j=0;j<length;j++){result[j]=result[j]^ba[j]}}return result};bintools.prototype.merge=function(...baArray){this.assert(baArray.length>1);let count=0;let size=0;for(let ba of baArray){this.assert(ba instanceof Uint8Array);size+=ba.length}let result=new Uint8Array(size);for(let ba of baArray){result.set(ba,count);count+=ba.length}return result};
+
+function id(i) {
+  return document.getElementById(i);
+}
+
+function value(i) {
+  return id(i).value.trim();
+}
+
+async function copy() {
+  id("copy").disabled = true;
+  await navigator.clipboard.writeText(value("result"));
+  setTimeout(function() { id("copy").disabled = false; }, 500);
+}
+
+function parseWords(txt) {
+  let words = txt.split(/[\s]+/);
+  return words.map(w => w.trim()).filter(w => w.length > 0);
+}
+
+function passwordify(txt) {
+  return bin.toBase64(bin.fromHex(txt)).replace(/\//g,"#").replace(/\+/g,"@").replace(/\=/g,"!");
+}
+
+function random(txt) {
+  let i = parseInt(txt, 10);
+  return (i > 0 && i <= 65536) ? bin.toHex(bin.getRandomBytes(i)) : bin.getRandomGuid();
+}
+
+function xor(txt) {
+  return bin.toHex(bin.xor(...parseWords(txt).map(w => bin.fromHex(w))));
+}
+
+function generateResult(txt) {
+  switch (value("mode")) {
+    case "base64encode":
+      return btoa(txt);
+    case "base64decode":
+      return atob(txt);
+    case "base64urlencode":
+      return bin.toSafeBase64(bin.fromString(txt));
+    case "base64urldecode":
+      return bin.toString(bin.fromSafeBase64(txt));
+    case "hexencode":
+      return bin.toHex(bin.fromString(txt));
+    case "hexdecode":
+      return bin.toString(bin.fromHex(txt));
+    case "json":
+      return JSON.stringify(JSON.parse(txt), null, 2);
+    case "noop":
+      return txt;
+    case "passwordify":
+      return passwordify(txt);
+    case "random":
+      return random(txt);
+    case "xor":
+      return xor(txt);
+  }
+  return "";
+}
+
+function refresh() {
+  id("run").disabled = (value("mode") != "random") && (value("txt") == "");
+}
+
+function init() {
+  if (!navigator.clipboard) {
+    id("copy").disabled = true;
+  }
+  let params = new URLSearchParams(window.location.search);
+  for (let k of params.keys()) { if (id(k)) id(k).value = params.get(k); }
+  id("txt").focus();
+  refresh();
+  id("upload").addEventListener("change", function() {
+    let file = this.files[0];
+    let fileReader = new FileReader();
+    fileReader.onload = function() {
+      let fileData = "";
+      let intArray = new Uint8Array(fileReader.result);
+      for (let i = 0; i < intArray.length; i++) {
+        fileData += String.fromCharCode(intArray[i]);
+      }
+      id("uploadFile").value = fileData;
+      id("txt").value = fileData;
+      id("txt").disabled = true;
+      refresh();
+      id("run").focus();
+    }
+    fileReader.readAsArrayBuffer(file);
+  });
+  run();
+}
+
+function run() {
+  let txt = id("txt").disabled ? value("uploadFile") : value("txt");
+  let result = "";
+  try {
+    if (!id("run").disabled) {
+      result = generateResult(txt);
+    }
+  }
+  catch (e) {
+    console.error(e);
+  }
+  id("result").value = result;
+  let downloadFile = id("downloadFile");
+  downloadFile.href = "data:application/octet-stream;base64," + btoa(result);
+  downloadFile.setAttribute("download", "download.dat");
+}
+
+</script>
+<style>
+html { font-family: Courier, Monospace; font-size: 16px; }
+body { background-color: #FFFFFF; color: #000000; font-family: inherit; font-size: inherit; }
+button { width:30%; font-family: inherit; font-size: inherit; }
+input { width: 45%; font-family: inherit; font-size: inherit; }
+select { width: 45%; font-family: inherit; font-size: inherit; }
+textarea { width: 95%; font-family: inherit; font-size: inherit; }
+</style>
+<title>Encode</title>
+</head>
+<body onload="init()">
+<select id="mode" oninput="refresh()">
+<option selected value="">Choose Mode . . .</option>
+<option value="base64encode">Base64 Encode</option>
+<option value="base64decode">Base64 Decode</option>
+<option value="base64urlencode">Base64 URL Encode</option>
+<option value="base64urldecode">Base64 URL Decode</option>
+<option value="hexencode">Hex Encode</option>
+<option value="hexdecode">Hex Decode</option>
+<option value="passwordify">Hex Passwordify</option>
+<option value="xor">Hex XOR</option>
+<option value="json">JSON Prettify</option>
+<option value="noop">Noop</option>
+<option value="random">Random</option>
+</select>
+<input id="upload" type="file" />
+<br>
+<br>
+<textarea id="txt" oninput="refresh()" placeholder="text" rows="10"></textarea>
+<br>
+<br>
+<hr>
+<br>
+<button id="run" onclick="run()" type="button">RUN</button> &nbsp;
+<button id="copy" onclick="copy()" type="button">COPY</button> &nbsp;
+<a id="downloadFile">SAVE</a>
+<br>
+<br>
+<br>
+<textarea id="result" readonly rows="10"></textarea>
+<input id="uploadFile" type="hidden" />
+</body>
+</html>

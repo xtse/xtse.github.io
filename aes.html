@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width">
+<script>
+
+/* OpenSSL: echo "U2FsdGVkX1/l4WUWWZJ3uoOcDucVWHJoCKec0Uvxw4s=" | openssl enc -aes-256-cbc -base64 -d -k mypassword -md sha256 */
+
+/* bin.js 2023-09-22 */
+
+var bin=new bintools;function bintools(){}bintools.prototype.assert=function(assertion){if(!(assertion===true)){console.trace();throw"ERROR"}};bintools.prototype.toHex=function(arr){this.assert(arr instanceof Uint8Array);return arr.reduce(((hex,b)=>hex+b.toString(16).padStart(2,"0")),"")};bintools.prototype.fromHex=function(txt){this.assert(typeof txt==="string");let hex=txt.replace(/[^a-fA-f0-9]/g,"");this.assert(hex.length%2==0);return new Uint8Array(hex.match(/.{1,2}/g).map((b=>parseInt(b,16))))};bintools.prototype.toBase64=function(arr){this.assert(arr instanceof Uint8Array);return btoa(this.toString(arr))};bintools.prototype.fromBase64=function(txt){this.assert(typeof txt==="string");return this.fromString(atob(txt))};bintools.prototype.toSafeBase64=function(arr){this.assert(arr instanceof Uint8Array);return this.toBase64(arr).replace(/\//g,"_").replace(/\+/g,"-").replace(/\=/g,"")};bintools.prototype.fromSafeBase64=function(txt){this.assert(typeof txt==="string");return this.fromBase64(txt.replace(/_/g,"/").replace(/-/g,"+"))};bintools.prototype.toString=function(arr){this.assert(arr instanceof Uint8Array);let result="";for(let i=0;i<arr.length;i++)result+=String.fromCharCode(arr[i]);return result};bintools.prototype.fromString=function(txt){this.assert(typeof txt==="string");return new Uint8Array(txt.split("").map((s=>s.charCodeAt(0))))};bintools.prototype.getRandomBytes=function(size){this.assert(typeof size==="number"&&size>0);let randomBytes=new Uint8Array(size);if(size<=65536){window.crypto.getRandomValues(randomBytes)}else{let buf=new Uint8Array(65536);let bufIndex=0;window.crypto.getRandomValues(buf);for(let i=0;i<size;i++){if(bufIndex==buf.length){bufIndex=0;window.crypto.getRandomValues(buf)}randomBytes[i]=buf[bufIndex];bufIndex++}}return randomBytes};bintools.prototype.getRandomGuid=function(){let s=this.toHex(this.getRandomBytes(16));return s.substring(0,8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20)};bintools.prototype.xor=function(...baArray){this.assert(baArray.length>1);let length=-1;for(let ba of baArray){if(length==-1)length=ba.length;this.assert(ba instanceof Uint8Array);this.assert(ba.length==length)}let result=new Uint8Array(length);let ba=baArray[0];for(let i=0;i<length;i++)result[i]=ba[i];for(let i=1;i<baArray.length;i++){ba=baArray[i];for(let j=0;j<length;j++){result[j]=result[j]^ba[j]}}return result};bintools.prototype.merge=function(...baArray){this.assert(baArray.length>1);let count=0;let size=0;for(let ba of baArray){this.assert(ba instanceof Uint8Array);size+=ba.length}let result=new Uint8Array(size);for(let ba of baArray){result.set(ba,count);count+=ba.length}return result};
+
+function id(i) {
+  return document.getElementById(i);
+}
+
+function value(i) {
+  return id(i).value.trim();
+}
+
+async function sha256(data) {
+  return new Uint8Array(await window.crypto.subtle.digest("SHA-256", data));
+}
+
+async function checksum(data) {
+  return (await sha256(data)).slice(0, 2);
+}
+
+async function EVP_BytesToKey(pass, salt) {
+  let rounds = 3, nk = 8, key = [], iv = [], hash = [], result = [], tmp = bin.merge(pass, salt);
+  hash[0] = await sha256(tmp);
+  result = hash[0];
+  for (let i = 1; i < rounds; i++) {
+    hash[i] = await sha256(bin.merge(hash[i - 1], tmp));
+    result = bin.merge(result, hash[i]);
+  }
+  key = result.slice(0, 4 * nk);
+  iv = result.slice(4 * nk, 4 * nk + 16);
+  return { key: key, iv: iv };
+}
+
+async function encrypt() {
+  if (!id("textin").readOnly) { id("textin").raw = bin.fromString(value("textin")); }
+  let pass = bin.fromString(value("key"));
+  let plain = id("textin").raw;
+  let nonce = bin.getRandomBytes(6);
+  let sum = await checksum(bin.merge(nonce, pass, await sha256(plain)));
+  let salt = bin.merge(sum, nonce);
+  let hash = await EVP_BytesToKey(pass, salt);
+  let params = { name: "AES-CBC", iv: hash.iv };
+  let ik = await window.crypto.subtle.importKey("raw", hash.key, "AES-CBC", false, ["encrypt"]);
+  let cipher = new Uint8Array(await window.crypto.subtle.encrypt(params, ik, plain));
+  id("textout").raw = bin.merge(bin.fromString("Salted__"), salt, cipher);
+  if (id("textout").raw.length < 1000 * 1000 && ascii(id("textin").raw)) {
+    id("textout").value = btoa(bin.toString(id("textout").raw)).match(/.{1,64}/g).join("\n");
+  }
+  else {
+    id("textout").value = "[BINARY]";
+  }
+}
+
+async function decrypt() {
+  if (!id("textin").readOnly) id("textin").raw = bin.fromString(atob(value("textin")));
+  let key = bin.fromString(value("key"));
+  let data = id("textin").raw;
+  let salt = data.slice(8, 16);
+  let sum = bin.toHex(salt.slice(0, 2));
+  let nonce = salt.slice(2, 8);
+  let cipher = data.slice(16);
+  let hash = await EVP_BytesToKey(key, salt);
+  let params = { name: "AES-CBC", iv: hash.iv };
+  let ik = await window.crypto.subtle.importKey("raw", hash.key, "AES-CBC", false, ["decrypt"]);
+  let plain = new Uint8Array();
+  try { plain = new Uint8Array(await window.crypto.subtle.decrypt(params, ik, cipher)); }
+  catch (e) { console.warn(e); }
+  if (sum != bin.toHex(await checksum(bin.merge(nonce, key, await sha256(plain))))) alert("CHECKSUM ERROR");
+  id("textout").raw = plain;
+  if (plain.length < 1000 * 1000 && ascii(plain)) {
+    id("textout").value = bin.toString(plain);
+  }
+  else {
+    id("textout").value = "[BINARY]";
+  }
+}
+
+async function exec(mode) {
+  reset();
+  id("textout").raw = id("textout").value = "";
+  if (mode == "encrypt") encrypt();
+  else if (mode == "decrypt") decrypt();
+}
+
+async function copy() {
+  id("copy").disabled = true;
+  await navigator.clipboard.writeText(id("textout").value);
+  setTimeout(function() { id("copy").disabled = false; }, 500);
+}
+
+function reset() {
+  URL.revokeObjectURL(id("download").href);
+  id("download").setAttribute("download", "");
+  id("download").href = "";
+}
+
+function timestamp() {
+  let date = new Date();
+  return date.getFullYear().toString() +
+    (date.getMonth() + 1).toString().padStart(2, "0") +
+    date.getDate().toString().padStart(2, "0") + "-" +
+    date.getHours().toString().padStart(2, "0") +
+    date.getMinutes().toString().padStart(2, "0") +
+    date.getSeconds().toString().padStart(2, "0");
+}
+
+function ascii(bytes) {
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] != 10 && bytes[i] != 13 && (bytes[i] < 32 || bytes[i] > 126)) return false;
+  }
+  return true;
+}
+
+async function keyinput() {
+  let key = value("key");
+  let sum = bin.toHex(await checksum(bin.fromString(key))).toUpperCase().substring(0, 2);
+  id("heading").innerHTML = (key.length < 8) ? document.title : document.title + " (" + sum + ")";
+  id("upload").disabled = (key.length == 0);
+  id("encrypt").disabled = (key.length == 0);
+  id("decrypt").disabled = (key.length == 0);
+}
+
+function save() {
+  let files = id("upload").files;
+  let prefix = files.length == 0 ? "file" : files[0].name.split(".").shift().split("-").shift();
+  let encrypted = id("textout").raw.length > 8 && bin.toString(id("textout").raw.slice(0, 8)) == "Salted__";
+  let fileName = prefix + "-" + timestamp() + (encrypted ? ".aes" : ".dat");
+  let fileData = id("textout").raw;
+  id("download").href = URL.createObjectURL(new Blob([fileData], { type: "application/octet-stream" }));
+  id("download").setAttribute("download", fileName);
+  id("download").click();
+}
+
+async function init() {
+  reset();
+  id("heading").innerHTML = document.title = "AES";
+  id("key").value = id("textin").value = id("textout").value = "";
+  id("textin").readOnly = false;
+  if (!navigator.clipboard) id("copy").disabled = true;
+  let params = new URLSearchParams(window.location.search);
+  for (let k of params.keys()) { if (id(k)) id(k).value = params.get(k); }
+  await keyinput();
+  id("key").focus();
+  if (params.get("mode")) id(params.get("mode")).click();
+  id("upload").addEventListener("change", function() {
+    id("textin").raw = id("textin").value = id("textout").raw = id("textout").value = "";
+    id("textin").readOnly = false;
+    if (this.files.length == 0) {
+      return;
+    }
+    let file = this.files[0];
+    let reader = new FileReader();
+    reader.onload = async function() {
+      let bytes = new Uint8Array(reader.result);
+      id("textin").raw = bytes;
+      let encrypted = bytes.length > 8 && bin.toString(bytes.slice(0, 8)) == "Salted__";
+      if (id("textin").raw.length < 1000 * 1000 && (encrypted || ascii(id("textin").raw))) {
+        id("textin").value = encrypted ? btoa(bin.toString(bytes)).match(/.{1,64}/g).join("\n") : bin.toString(bytes);
+      }
+      else {
+        id("textin").readOnly = true;
+        id("textin").value = "[BINARY]";
+      }
+    }
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+</script>
+<style>
+html { font-family: Courier, Monospace; font-size: 16px; }
+body { background-color: #FFFFFF; color: #000000; font-family: inherit; font-size: inherit; }
+button { width: 45%; font-family: inherit; font-size: inherit; }
+input { width: 45%; font-family: inherit; font-size: inherit; }
+textarea { width: 95%; font-family: inherit; font-size: inherit; }
+</style>
+</head>
+<body onload="init()">
+<h2 id="heading"></h2>
+<input id="key" oninput="keyinput()" placeholder="key" type="password" />
+<input id="upload" type="file" /><br><br>
+<textarea id="textin" placeholder="input text" rows="9"></textarea><br><br>
+<button id="encrypt" onclick="exec('encrypt')" type="button">ENCRYPT</button>
+<button id="decrypt" onclick="exec('decrypt')" type="button">DECRYPT</button><br><br>
+<textarea id="textout" placeholder="output text" readonly rows="9"></textarea><br><br>
+<button id="copy" onclick="copy()" type="button">COPY</button>
+<button id="save" onclick="save()" type="button">SAVE</button><br><br>
+<a hidden id="download"></a>
+</body>
+</html>

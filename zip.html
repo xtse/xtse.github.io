@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width">
+<script>
+
+/* SparkMD5 v3.0.2 (https://github.com/satazor/js-spark-md5) */
+
+(function(factory){if(typeof exports==="object"){module.exports=factory()}else if(typeof define==="function"&&define.amd){define(factory)}else{var glob;try{glob=window}catch(e){glob=self}glob.SparkMD5=factory()}})(function(undefined){"use strict";var add32=function(a,b){return a+b&4294967295},hex_chr=["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];function cmn(q,a,b,x,s,t){a=add32(add32(a,q),add32(x,t));return add32(a<<s|a>>>32-s,b)}function md5cycle(x,k){var a=x[0],b=x[1],c=x[2],d=x[3];a+=(b&c|~b&d)+k[0]-680876936|0;a=(a<<7|a>>>25)+b|0;d+=(a&b|~a&c)+k[1]-389564586|0;d=(d<<12|d>>>20)+a|0;c+=(d&a|~d&b)+k[2]+606105819|0;c=(c<<17|c>>>15)+d|0;b+=(c&d|~c&a)+k[3]-1044525330|0;b=(b<<22|b>>>10)+c|0;a+=(b&c|~b&d)+k[4]-176418897|0;a=(a<<7|a>>>25)+b|0;d+=(a&b|~a&c)+k[5]+1200080426|0;d=(d<<12|d>>>20)+a|0;c+=(d&a|~d&b)+k[6]-1473231341|0;c=(c<<17|c>>>15)+d|0;b+=(c&d|~c&a)+k[7]-45705983|0;b=(b<<22|b>>>10)+c|0;a+=(b&c|~b&d)+k[8]+1770035416|0;a=(a<<7|a>>>25)+b|0;d+=(a&b|~a&c)+k[9]-1958414417|0;d=(d<<12|d>>>20)+a|0;c+=(d&a|~d&b)+k[10]-42063|0;c=(c<<17|c>>>15)+d|0;b+=(c&d|~c&a)+k[11]-1990404162|0;b=(b<<22|b>>>10)+c|0;a+=(b&c|~b&d)+k[12]+1804603682|0;a=(a<<7|a>>>25)+b|0;d+=(a&b|~a&c)+k[13]-40341101|0;d=(d<<12|d>>>20)+a|0;c+=(d&a|~d&b)+k[14]-1502002290|0;c=(c<<17|c>>>15)+d|0;b+=(c&d|~c&a)+k[15]+1236535329|0;b=(b<<22|b>>>10)+c|0;a+=(b&d|c&~d)+k[1]-165796510|0;a=(a<<5|a>>>27)+b|0;d+=(a&c|b&~c)+k[6]-1069501632|0;d=(d<<9|d>>>23)+a|0;c+=(d&b|a&~b)+k[11]+643717713|0;c=(c<<14|c>>>18)+d|0;b+=(c&a|d&~a)+k[0]-373897302|0;b=(b<<20|b>>>12)+c|0;a+=(b&d|c&~d)+k[5]-701558691|0;a=(a<<5|a>>>27)+b|0;d+=(a&c|b&~c)+k[10]+38016083|0;d=(d<<9|d>>>23)+a|0;c+=(d&b|a&~b)+k[15]-660478335|0;c=(c<<14|c>>>18)+d|0;b+=(c&a|d&~a)+k[4]-405537848|0;b=(b<<20|b>>>12)+c|0;a+=(b&d|c&~d)+k[9]+568446438|0;a=(a<<5|a>>>27)+b|0;d+=(a&c|b&~c)+k[14]-1019803690|0;d=(d<<9|d>>>23)+a|0;c+=(d&b|a&~b)+k[3]-187363961|0;c=(c<<14|c>>>18)+d|0;b+=(c&a|d&~a)+k[8]+1163531501|0;b=(b<<20|b>>>12)+c|0;a+=(b&d|c&~d)+k[13]-1444681467|0;a=(a<<5|a>>>27)+b|0;d+=(a&c|b&~c)+k[2]-51403784|0;d=(d<<9|d>>>23)+a|0;c+=(d&b|a&~b)+k[7]+1735328473|0;c=(c<<14|c>>>18)+d|0;b+=(c&a|d&~a)+k[12]-1926607734|0;b=(b<<20|b>>>12)+c|0;a+=(b^c^d)+k[5]-378558|0;a=(a<<4|a>>>28)+b|0;d+=(a^b^c)+k[8]-2022574463|0;d=(d<<11|d>>>21)+a|0;c+=(d^a^b)+k[11]+1839030562|0;c=(c<<16|c>>>16)+d|0;b+=(c^d^a)+k[14]-35309556|0;b=(b<<23|b>>>9)+c|0;a+=(b^c^d)+k[1]-1530992060|0;a=(a<<4|a>>>28)+b|0;d+=(a^b^c)+k[4]+1272893353|0;d=(d<<11|d>>>21)+a|0;c+=(d^a^b)+k[7]-155497632|0;c=(c<<16|c>>>16)+d|0;b+=(c^d^a)+k[10]-1094730640|0;b=(b<<23|b>>>9)+c|0;a+=(b^c^d)+k[13]+681279174|0;a=(a<<4|a>>>28)+b|0;d+=(a^b^c)+k[0]-358537222|0;d=(d<<11|d>>>21)+a|0;c+=(d^a^b)+k[3]-722521979|0;c=(c<<16|c>>>16)+d|0;b+=(c^d^a)+k[6]+76029189|0;b=(b<<23|b>>>9)+c|0;a+=(b^c^d)+k[9]-640364487|0;a=(a<<4|a>>>28)+b|0;d+=(a^b^c)+k[12]-421815835|0;d=(d<<11|d>>>21)+a|0;c+=(d^a^b)+k[15]+530742520|0;c=(c<<16|c>>>16)+d|0;b+=(c^d^a)+k[2]-995338651|0;b=(b<<23|b>>>9)+c|0;a+=(c^(b|~d))+k[0]-198630844|0;a=(a<<6|a>>>26)+b|0;d+=(b^(a|~c))+k[7]+1126891415|0;d=(d<<10|d>>>22)+a|0;c+=(a^(d|~b))+k[14]-1416354905|0;c=(c<<15|c>>>17)+d|0;b+=(d^(c|~a))+k[5]-57434055|0;b=(b<<21|b>>>11)+c|0;a+=(c^(b|~d))+k[12]+1700485571|0;a=(a<<6|a>>>26)+b|0;d+=(b^(a|~c))+k[3]-1894986606|0;d=(d<<10|d>>>22)+a|0;c+=(a^(d|~b))+k[10]-1051523|0;c=(c<<15|c>>>17)+d|0;b+=(d^(c|~a))+k[1]-2054922799|0;b=(b<<21|b>>>11)+c|0;a+=(c^(b|~d))+k[8]+1873313359|0;a=(a<<6|a>>>26)+b|0;d+=(b^(a|~c))+k[15]-30611744|0;d=(d<<10|d>>>22)+a|0;c+=(a^(d|~b))+k[6]-1560198380|0;c=(c<<15|c>>>17)+d|0;b+=(d^(c|~a))+k[13]+1309151649|0;b=(b<<21|b>>>11)+c|0;a+=(c^(b|~d))+k[4]-145523070|0;a=(a<<6|a>>>26)+b|0;d+=(b^(a|~c))+k[11]-1120210379|0;d=(d<<10|d>>>22)+a|0;c+=(a^(d|~b))+k[2]+718787259|0;c=(c<<15|c>>>17)+d|0;b+=(d^(c|~a))+k[9]-343485551|0;b=(b<<21|b>>>11)+c|0;x[0]=a+x[0]|0;x[1]=b+x[1]|0;x[2]=c+x[2]|0;x[3]=d+x[3]|0}function md5blk(s){var md5blks=[],i;for(i=0;i<64;i+=4){md5blks[i>>2]=s.charCodeAt(i)+(s.charCodeAt(i+1)<<8)+(s.charCodeAt(i+2)<<16)+(s.charCodeAt(i+3)<<24)}return md5blks}function md5blk_array(a){var md5blks=[],i;for(i=0;i<64;i+=4){md5blks[i>>2]=a[i]+(a[i+1]<<8)+(a[i+2]<<16)+(a[i+3]<<24)}return md5blks}function md51(s){var n=s.length,state=[1732584193,-271733879,-1732584194,271733878],i,length,tail,tmp,lo,hi;for(i=64;i<=n;i+=64){md5cycle(state,md5blk(s.substring(i-64,i)))}s=s.substring(i-64);length=s.length;tail=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];for(i=0;i<length;i+=1){tail[i>>2]|=s.charCodeAt(i)<<(i%4<<3)}tail[i>>2]|=128<<(i%4<<3);if(i>55){md5cycle(state,tail);for(i=0;i<16;i+=1){tail[i]=0}}tmp=n*8;tmp=tmp.toString(16).match(/(.*?)(.{0,8})$/);lo=parseInt(tmp[2],16);hi=parseInt(tmp[1],16)||0;tail[14]=lo;tail[15]=hi;md5cycle(state,tail);return state}function md51_array(a){var n=a.length,state=[1732584193,-271733879,-1732584194,271733878],i,length,tail,tmp,lo,hi;for(i=64;i<=n;i+=64){md5cycle(state,md5blk_array(a.subarray(i-64,i)))}a=i-64<n?a.subarray(i-64):new Uint8Array(0);length=a.length;tail=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];for(i=0;i<length;i+=1){tail[i>>2]|=a[i]<<(i%4<<3)}tail[i>>2]|=128<<(i%4<<3);if(i>55){md5cycle(state,tail);for(i=0;i<16;i+=1){tail[i]=0}}tmp=n*8;tmp=tmp.toString(16).match(/(.*?)(.{0,8})$/);lo=parseInt(tmp[2],16);hi=parseInt(tmp[1],16)||0;tail[14]=lo;tail[15]=hi;md5cycle(state,tail);return state}function rhex(n){var s="",j;for(j=0;j<4;j+=1){s+=hex_chr[n>>j*8+4&15]+hex_chr[n>>j*8&15]}return s}function hex(x){var i;for(i=0;i<x.length;i+=1){x[i]=rhex(x[i])}return x.join("")}if(hex(md51("hello"))!=="5d41402abc4b2a76b9719d911017c592"){add32=function(x,y){var lsw=(x&65535)+(y&65535),msw=(x>>16)+(y>>16)+(lsw>>16);return msw<<16|lsw&65535}}if(typeof ArrayBuffer!=="undefined"&&!ArrayBuffer.prototype.slice){(function(){function clamp(val,length){val=val|0||0;if(val<0){return Math.max(val+length,0)}return Math.min(val,length)}ArrayBuffer.prototype.slice=function(from,to){var length=this.byteLength,begin=clamp(from,length),end=length,num,target,targetArray,sourceArray;if(to!==undefined){end=clamp(to,length)}if(begin>end){return new ArrayBuffer(0)}num=end-begin;target=new ArrayBuffer(num);targetArray=new Uint8Array(target);sourceArray=new Uint8Array(this,begin,num);targetArray.set(sourceArray);return target}})()}function toUtf8(str){if(/[\u0080-\uFFFF]/.test(str)){str=unescape(encodeURIComponent(str))}return str}function utf8Str2ArrayBuffer(str,returnUInt8Array){var length=str.length,buff=new ArrayBuffer(length),arr=new Uint8Array(buff),i;for(i=0;i<length;i+=1){arr[i]=str.charCodeAt(i)}return returnUInt8Array?arr:buff}function arrayBuffer2Utf8Str(buff){return String.fromCharCode.apply(null,new Uint8Array(buff))}function concatenateArrayBuffers(first,second,returnUInt8Array){var result=new Uint8Array(first.byteLength+second.byteLength);result.set(new Uint8Array(first));result.set(new Uint8Array(second),first.byteLength);return returnUInt8Array?result:result.buffer}function hexToBinaryString(hex){var bytes=[],length=hex.length,x;for(x=0;x<length-1;x+=2){bytes.push(parseInt(hex.substr(x,2),16))}return String.fromCharCode.apply(String,bytes)}function SparkMD5(){this.reset()}SparkMD5.prototype.append=function(str){this.appendBinary(toUtf8(str));return this};SparkMD5.prototype.appendBinary=function(contents){this._buff+=contents;this._length+=contents.length;var length=this._buff.length,i;for(i=64;i<=length;i+=64){md5cycle(this._hash,md5blk(this._buff.substring(i-64,i)))}this._buff=this._buff.substring(i-64);return this};SparkMD5.prototype.end=function(raw){var buff=this._buff,length=buff.length,i,tail=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],ret;for(i=0;i<length;i+=1){tail[i>>2]|=buff.charCodeAt(i)<<(i%4<<3)}this._finish(tail,length);ret=hex(this._hash);if(raw){ret=hexToBinaryString(ret)}this.reset();return ret};SparkMD5.prototype.reset=function(){this._buff="";this._length=0;this._hash=[1732584193,-271733879,-1732584194,271733878];return this};SparkMD5.prototype.getState=function(){return{buff:this._buff,length:this._length,hash:this._hash.slice()}};SparkMD5.prototype.setState=function(state){this._buff=state.buff;this._length=state.length;this._hash=state.hash;return this};SparkMD5.prototype.destroy=function(){delete this._hash;delete this._buff;delete this._length};SparkMD5.prototype._finish=function(tail,length){var i=length,tmp,lo,hi;tail[i>>2]|=128<<(i%4<<3);if(i>55){md5cycle(this._hash,tail);for(i=0;i<16;i+=1){tail[i]=0}}tmp=this._length*8;tmp=tmp.toString(16).match(/(.*?)(.{0,8})$/);lo=parseInt(tmp[2],16);hi=parseInt(tmp[1],16)||0;tail[14]=lo;tail[15]=hi;md5cycle(this._hash,tail)};SparkMD5.hash=function(str,raw){return SparkMD5.hashBinary(toUtf8(str),raw)};SparkMD5.hashBinary=function(content,raw){var hash=md51(content),ret=hex(hash);return raw?hexToBinaryString(ret):ret};SparkMD5.ArrayBuffer=function(){this.reset()};SparkMD5.ArrayBuffer.prototype.append=function(arr){var buff=concatenateArrayBuffers(this._buff.buffer,arr,true),length=buff.length,i;this._length+=arr.byteLength;for(i=64;i<=length;i+=64){md5cycle(this._hash,md5blk_array(buff.subarray(i-64,i)))}this._buff=i-64<length?new Uint8Array(buff.buffer.slice(i-64)):new Uint8Array(0);return this};SparkMD5.ArrayBuffer.prototype.end=function(raw){var buff=this._buff,length=buff.length,tail=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],i,ret;for(i=0;i<length;i+=1){tail[i>>2]|=buff[i]<<(i%4<<3)}this._finish(tail,length);ret=hex(this._hash);if(raw){ret=hexToBinaryString(ret)}this.reset();return ret};SparkMD5.ArrayBuffer.prototype.reset=function(){this._buff=new Uint8Array(0);this._length=0;this._hash=[1732584193,-271733879,-1732584194,271733878];return this};SparkMD5.ArrayBuffer.prototype.getState=function(){var state=SparkMD5.prototype.getState.call(this);state.buff=arrayBuffer2Utf8Str(state.buff);return state};SparkMD5.ArrayBuffer.prototype.setState=function(state){state.buff=utf8Str2ArrayBuffer(state.buff,true);return SparkMD5.prototype.setState.call(this,state)};SparkMD5.ArrayBuffer.prototype.destroy=SparkMD5.prototype.destroy;SparkMD5.ArrayBuffer.prototype._finish=SparkMD5.prototype._finish;SparkMD5.ArrayBuffer.hash=function(arr,raw){var hash=md51_array(new Uint8Array(arr)),ret=hex(hash);return raw?hexToBinaryString(ret):ret};return SparkMD5});
+
+/* UZIP (https://github.com/photopea/UZIP.js) */
+
+var CRC32,UZIP={};"object"==typeof module&&(module.exports=UZIP),UZIP.parse=function(r,e){for(var t=UZIP.bin.readUshort,n=UZIP.bin.readUint,f=0,i={},a=new Uint8Array(r),o=a.length-4;101010256!=n(a,o);)o--;f=o;f+=4;var U=t(a,f+=4),u=(t(a,f+=2),n(a,f+=2)),l=n(a,f+=4);f+=4,f=l;for(var d=0;d<U;d++){n(a,f);f+=4,f+=4,f+=4;n(a,f+=4),u=n(a,f+=4);var I=n(a,f+=4),c=t(a,f+=4),v=t(a,f+2),P=t(a,f+4);f+=6;var Z=n(a,f+=8);f+=4,f+=c+v+P,UZIP._readLocal(a,Z,i,u,I,e)}return i},UZIP._readLocal=function(r,e,t,n,f,i){var a=UZIP.bin.readUshort,o=UZIP.bin.readUint,U=(o(r,e),a(r,e+=4),a(r,e+=2),a(r,e+=2)),u=o(r,e+=2),l=o(r,e+=4);e+=4;var d=a(r,e+=8),I=a(r,e+=2);e+=2;var c=UZIP.bin.readUTF8(r,e,d);if(e+=d,e+=I,i)t[c]={size:f,crc:l.toString(16).padStart(8,"0"),mtime:u};else{var v=new Uint8Array(r.buffer,e);if(0==U)t[c]=new Uint8Array(v.buffer.slice(e,e+n));else{if(8!=U)throw"unknown compression method: "+U;var P=new Uint8Array(f);UZIP.inflateRaw(v,P),t[c]=P}}},UZIP.inflateRaw=function(r,e){return UZIP.F.inflate(r,e)},UZIP.inflate=function(r,e){r[0],r[1];return UZIP.inflateRaw(new Uint8Array(r.buffer,r.byteOffset+2,r.length-6),e)},UZIP.deflate=function(r,e){null==e&&(e={level:6});var t=0,n=new Uint8Array(50+Math.floor(1.1*r.length));n[t]=120,n[t+1]=156,t+=2,t=UZIP.F.deflateRaw(r,n,t,e.level);var f=UZIP.adler(r,0,r.length);return n[t+0]=f>>>24&255,n[t+1]=f>>>16&255,n[t+2]=f>>>8&255,n[t+3]=f>>>0&255,new Uint8Array(n.buffer,0,t+4)},UZIP.deflateRaw=function(r,e){null==e&&(e={level:6});var t=new Uint8Array(50+Math.floor(1.1*r.length)),n=UZIP.F.deflateRaw(r,t,n,e.level);return new Uint8Array(t.buffer,0,n)},UZIP.encode=function(r,e,t){null==e&&(e=!1);var n=0,f=UZIP.bin.writeUint,i=UZIP.bin.writeUshort,a={};for(var o in r){var U=!UZIP._noNeed(o)&&!e,u=r[o],l=UZIP.crc.crc(u,0,u.length);a[o]={cpr:U,usize:u.length,crc:l,file:U?UZIP.deflateRaw(u):u,manifest:t[o]}}for(var o in a)n+=a[o].file.length+30+46+2*UZIP.bin.sizeUTF8(o);n+=22;var d=new Uint8Array(n),I=0,c=[];for(var o in a){var v=a[o];c.push(I),I=UZIP._writeHeader(d,I,o,v,0)}var P=0,Z=I;for(var o in a){v=a[o];c.push(I),I=UZIP._writeHeader(d,I,o,v,1,c[P++])}var s=I-Z;return f(d,I,101010256),I+=4,i(d,I+=4,P),i(d,I+=2,P),f(d,I+=2,s),f(d,I+=4,Z),I+=4,I+=2,d.buffer},UZIP._noNeed=function(r){var e=r.split(".").pop().toLowerCase();return-1!="az,png,zip".indexOf(e)},UZIP._writeHeader=function(r,e,t,n,f,i){var a=UZIP.bin.writeUint,o=UZIP.bin.writeUshort,U=n.file;return a(r,e,0==f?67324752:33639248),e+=4,1==f&&(e+=2),o(r,e,20),o(r,e+=2,0),o(r,e+=2,n.cpr?8:0),a(r,e+=2,n.manifest.mtime),a(r,e+=4,n.crc),a(r,e+=4,U.length),a(r,e+=4,n.usize),o(r,e+=4,UZIP.bin.sizeUTF8(t)),o(r,e+=2,0),e+=2,1==f&&(e+=2,e+=2,a(r,e+=6,i),e+=4),e+=UZIP.bin.writeUTF8(r,e,t),0==f&&(r.set(U,e),e+=U.length),e},UZIP.crc={table:function(){for(var r=new Uint32Array(256),e=0;e<256;e++){for(var t=e,n=0;n<8;n++)1&t?t=3988292384^t>>>1:t>>>=1;r[e]=t}return r}(),update:function(r,e,t,n){for(var f=0;f<n;f++)r=UZIP.crc.table[255&(r^e[t+f])]^r>>>8;return r},crc:function(r){return CRC32.buf(r)}},UZIP.adler=function(r,e,t){for(var n=1,f=0,i=e,a=e+t;i<a;){for(var o=Math.min(i+5552,a);i<o;)f+=n+=r[i++];n%=65521,f%=65521}return f<<16|n},UZIP.bin={readUshort:function(r,e){return r[e]|r[e+1]<<8},writeUshort:function(r,e,t){r[e]=255&t,r[e+1]=t>>8&255},readUint:function(r,e){return 16777216*r[e+3]+(r[e+2]<<16|r[e+1]<<8|r[e])},writeUint:function(r,e,t){r[e]=255&t,r[e+1]=t>>8&255,r[e+2]=t>>16&255,r[e+3]=t>>24&255},readASCII:function(r,e,t){for(var n="",f=0;f<t;f++)n+=String.fromCharCode(r[e+f]);return n},writeASCII:function(r,e,t){for(var n=0;n<t.length;n++)r[e+n]=t.charCodeAt(n)},pad:function(r){return r.length<2?"0"+r:r},readUTF8:function(r,e,t){for(var n,f="",i=0;i<t;i++)f+="%"+UZIP.bin.pad(r[e+i].toString(16));try{n=decodeURIComponent(f)}catch(n){return UZIP.bin.readASCII(r,e,t)}return n},writeUTF8:function(r,e,t){for(var n=t.length,f=0,i=0;i<n;i++){var a=t.charCodeAt(i);if(0==(4294967168&a))r[e+f]=a,f++;else if(0==(4294965248&a))r[e+f]=192|a>>6,r[e+f+1]=128|a>>0&63,f+=2;else if(0==(4294901760&a))r[e+f]=224|a>>12,r[e+f+1]=128|a>>6&63,r[e+f+2]=128|a>>0&63,f+=3;else{if(0!=(4292870144&a))throw"e";r[e+f]=240|a>>18,r[e+f+1]=128|a>>12&63,r[e+f+2]=128|a>>6&63,r[e+f+3]=128|a>>0&63,f+=4}}return f},sizeUTF8:function(r){for(var e=r.length,t=0,n=0;n<e;n++){var f=r.charCodeAt(n);if(0==(4294967168&f))t++;else if(0==(4294965248&f))t+=2;else if(0==(4294901760&f))t+=3;else{if(0!=(4292870144&f))throw"e";t+=4}}return t}},UZIP.F={},UZIP.F.deflateRaw=function(r,e,t,n){var f=[[0,0,0,0,0],[4,4,8,4,0],[4,5,16,8,0],[4,6,16,16,0],[4,10,16,32,0],[8,16,32,32,0],[8,16,128,128,0],[8,32,128,256,0],[32,128,258,1024,1],[32,258,258,4096,1]][n],i=UZIP.F.U,a=UZIP.F._goodIndex,o=(UZIP.F._hash,UZIP.F._putsE),U=0,u=t<<3,l=0,d=r.length;if(0==n){for(;U<d;){o(e,u,U+(g=Math.min(65535,d-U))==d?1:0),u=UZIP.F._copyExact(r,U,g,e,u+8),U+=g}return u>>>3}var I=i.lits,c=i.strt,v=i.prev,P=0,Z=0,s=0,h=0,F=0,p=0;d>2&&(c[p=UZIP.F._hash(r,0)]=0);for(U=0;U<d;U++){if(F=p,U+1<d-2){p=UZIP.F._hash(r,U+1);var w=U+1&32767;v[w]=c[p],c[p]=w}if(l<=U){(P>14e3||Z>26697)&&d-U>100&&(l<U&&(I[P]=U-l,P+=2,l=U),u=UZIP.F._writeBlock(U==d-1||l==d?1:0,I,P,h,r,s,U-s,e,u),P=Z=h=0,s=U);var _=0;U<d-2&&(_=UZIP.F._bestMatch(r,U,v,F,Math.min(f[2],d-U),f[3]));var g=_>>>16,b=65535&_;if(0!=_){b=65535&_;var m=a(g=_>>>16,i.of0);i.lhst[257+m]++;var y=a(b,i.df0);i.dhst[y]++,h+=i.exb[m]+i.dxb[y],I[P]=g<<23|U-l,I[P+1]=b<<16|m<<8|y,P+=2,l=U+g}else i.lhst[r[U]]++;Z++}}for(s==U&&0!=r.length||(l<U&&(I[P]=U-l,P+=2,l=U),u=UZIP.F._writeBlock(1,I,P,h,r,s,U-s,e,u),P=0,Z=0,P=Z=h=0,s=U);0!=(7&u);)u++;return u>>>3},UZIP.F._bestMatch=function(r,e,t,n,f,i){var a=32767&e,o=t[a],U=a-o+32768&32767;if(o==a||n!=UZIP.F._hash(r,e-U))return 0;for(var u=0,l=0,d=Math.min(32767,e);U<=d&&0!=--i&&o!=a;){if(0==u||r[e+u]==r[e+u-U]){var I=UZIP.F._howLong(r,e,U);if(I>u){if(l=U,(u=I)>=f)break;U+2<I&&(I=U+2);for(var c=0,v=0;v<I-2;v++){var P=e-U+v+32768&32767,Z=P-t[P]+32768&32767;Z>c&&(c=Z,o=P)}}}U+=(a=o)-(o=t[a])+32768&32767}return u<<16|l},UZIP.F._howLong=function(r,e,t){if(r[e]!=r[e-t]||r[e+1]!=r[e+1-t]||r[e+2]!=r[e+2-t])return 0;var n=e,f=Math.min(r.length,e+258);for(e+=3;e<f&&r[e]==r[e-t];)e++;return e-n},UZIP.F._hash=function(r,e){return(r[e]<<8|r[e+1])+(r[e+2]<<4)&65535},UZIP.saved=0,UZIP.F._writeBlock=function(r,e,t,n,f,i,a,o,U){var u,l,d,I,c,v,P,Z,s,h=UZIP.F.U,F=UZIP.F._putsF,p=UZIP.F._putsE;h.lhst[256]++,l=(u=UZIP.F.getTrees())[0],d=u[1],I=u[2],c=u[3],v=u[4],P=u[5],Z=u[6],s=u[7];var w=32+(0==(U+3&7)?0:8-(U+3&7))+(a<<3),_=n+UZIP.F.contSize(h.fltree,h.lhst)+UZIP.F.contSize(h.fdtree,h.dhst),g=n+UZIP.F.contSize(h.ltree,h.lhst)+UZIP.F.contSize(h.dtree,h.dhst);g+=14+3*P+UZIP.F.contSize(h.itree,h.ihst)+(2*h.ihst[16]+3*h.ihst[17]+7*h.ihst[18]);for(var b=0;b<286;b++)h.lhst[b]=0;for(b=0;b<30;b++)h.dhst[b]=0;for(b=0;b<19;b++)h.ihst[b]=0;var m=w<_&&w<g?0:_<g?1:2;F(o,U,r),F(o,U+1,m);U+=3;if(0==m){for(;0!=(7&U);)U++;U=UZIP.F._copyExact(f,i,a,o,U)}else{var y,C;if(1==m&&(y=h.fltree,C=h.fdtree),2==m){UZIP.F.makeCodes(h.ltree,l),UZIP.F.revCodes(h.ltree,l),UZIP.F.makeCodes(h.dtree,d),UZIP.F.revCodes(h.dtree,d),UZIP.F.makeCodes(h.itree,I),UZIP.F.revCodes(h.itree,I),y=h.ltree,C=h.dtree,p(o,U,c-257),p(o,U+=5,v-1),p(o,U+=5,P-4),U+=4;for(var A=0;A<P;A++)p(o,U+3*A,h.itree[1+(h.ordr[A]<<1)]);U+=3*P,U=UZIP.F._codeTiny(Z,h.itree,o,U),U=UZIP.F._codeTiny(s,h.itree,o,U)}for(var x=i,T=0;T<t;T+=2){for(var k=e[T],R=k>>>23,S=x+(8388607&k);x<S;)U=UZIP.F._writeLit(f[x++],y,o,U);if(0!=R){var z=e[T+1],M=z>>16,E=z>>8&255,L=255&z;p(o,U=UZIP.F._writeLit(257+E,y,o,U),R-h.of0[E]),U+=h.exb[E],F(o,U=UZIP.F._writeLit(L,C,o,U),M-h.df0[L]),U+=h.dxb[L],x+=R}}U=UZIP.F._writeLit(256,y,o,U)}return U},UZIP.F._copyExact=function(r,e,t,n,f){var i=f>>>3;return n[i]=t,n[i+1]=t>>>8,n[i+2]=255-n[i],n[i+3]=255-n[i+1],i+=4,n.set(new Uint8Array(r.buffer,e,t),i),f+(t+4<<3)},UZIP.F.getTrees=function(){for(var r=UZIP.F.U,e=UZIP.F._hufTree(r.lhst,r.ltree,15),t=UZIP.F._hufTree(r.dhst,r.dtree,15),n=[],f=UZIP.F._lenCodes(r.ltree,n),i=[],a=UZIP.F._lenCodes(r.dtree,i),o=0;o<n.length;o+=2)r.ihst[n[o]]++;for(o=0;o<i.length;o+=2)r.ihst[i[o]]++;for(var U=UZIP.F._hufTree(r.ihst,r.itree,7),u=19;u>4&&0==r.itree[1+(r.ordr[u-1]<<1)];)u--;return[e,t,U,f,a,u,n,i]},UZIP.F.getSecond=function(r){for(var e=[],t=0;t<r.length;t+=2)e.push(r[t+1]);return e},UZIP.F.nonZero=function(r){for(var e="",t=0;t<r.length;t+=2)0!=r[t+1]&&(e+=(t>>1)+",");return e},UZIP.F.contSize=function(r,e){for(var t=0,n=0;n<e.length;n++)t+=e[n]*r[1+(n<<1)];return t},UZIP.F._codeTiny=function(r,e,t,n){for(var f=0;f<r.length;f+=2){var i=r[f],a=r[f+1];n=UZIP.F._writeLit(i,e,t,n);var o=16==i?2:17==i?3:7;i>15&&(UZIP.F._putsE(t,n,a,o),n+=o)}return n},UZIP.F._lenCodes=function(r,e){for(var t=r.length;2!=t&&0==r[t-1];)t-=2;for(var n=0;n<t;n+=2){var f=r[n+1],i=n+3<t?r[n+3]:-1,a=n+5<t?r[n+5]:-1,o=0==n?-1:r[n-1];if(0==f&&i==f&&a==f){for(var U=n+5;U+2<t&&r[U+2]==f;)U+=2;(u=Math.min(U+1-n>>>1,138))<11?e.push(17,u-3):e.push(18,u-11),n+=2*u-2}else if(f==o&&i==f&&a==f){for(U=n+5;U+2<t&&r[U+2]==f;)U+=2;var u=Math.min(U+1-n>>>1,6);e.push(16,u-3),n+=2*u-2}else e.push(f,0)}return t>>>1},UZIP.F._hufTree=function(r,e,t){var n=[],f=r.length,i=e.length,a=0;for(a=0;a<i;a+=2)e[a]=0,e[a+1]=0;for(a=0;a<f;a++)0!=r[a]&&n.push({lit:a,f:r[a]});var o=n.length,U=n.slice(0);if(0==o)return 0;if(1==o){var u=n[0].lit;U=0==u?1:0;return e[1+(u<<1)]=1,e[1+(U<<1)]=1,1}n.sort((function(r,e){return r.f-e.f}));var l=n[0],d=n[1],I=0,c=1,v=2;for(n[0]={lit:-1,f:l.f+d.f,l:l,r:d,d:0};c!=o-1;)l=I!=c&&(v==o||n[I].f<n[v].f)?n[I++]:n[v++],d=I!=c&&(v==o||n[I].f<n[v].f)?n[I++]:n[v++],n[c++]={lit:-1,f:l.f+d.f,l:l,r:d};var P=UZIP.F.setDepth(n[c-1],0);for(P>t&&(UZIP.F.restrictDepth(U,t,P),P=t),a=0;a<o;a++)e[1+(U[a].lit<<1)]=U[a].d;return P},UZIP.F.setDepth=function(r,e){return-1!=r.lit?(r.d=e,e):Math.max(UZIP.F.setDepth(r.l,e+1),UZIP.F.setDepth(r.r,e+1))},UZIP.F.restrictDepth=function(r,e,t){var n=0,f=1<<t-e,i=0;for(r.sort((function(r,e){return e.d==r.d?r.f-e.f:e.d-r.d})),n=0;n<r.length&&r[n].d>e;n++){var a=r[n].d;r[n].d=e,i+=f-(1<<t-a)}for(i>>>=t-e;i>0;){(a=r[n].d)<e?(r[n].d++,i-=1<<e-a-1):n++}for(;n>=0;n--)r[n].d==e&&i<0&&(r[n].d--,i++)},UZIP.F._goodIndex=function(r,e){var t=0;return e[16|t]<=r&&(t|=16),e[8|t]<=r&&(t|=8),e[4|t]<=r&&(t|=4),e[2|t]<=r&&(t|=2),e[1|t]<=r&&(t|=1),t},UZIP.F._writeLit=function(r,e,t,n){return UZIP.F._putsF(t,n,e[r<<1]),n+e[1+(r<<1)]},UZIP.F.inflate=function(r,e){var t=Uint8Array;if(3==r[0]&&0==r[1])return e||new t(0);var n=UZIP.F,f=n._bitsF,i=n._bitsE,a=n._decodeTiny,o=n.makeCodes,U=n.codes2map,u=n._get17,l=n.U,d=null==e;d&&(e=new t(r.length>>>2<<3));for(var I,c,v=0,P=0,Z=0,s=0,h=0,F=0,p=0,w=0,_=0;0==v;)if(v=f(r,_,1),P=f(r,_+1,2),_+=3,0!=P){if(d&&(e=UZIP.F._check(e,w+(1<<17))),1==P&&(I=l.flmap,c=l.fdmap,F=511,p=31),2==P){Z=i(r,_,5)+257,s=i(r,_+5,5)+1,h=i(r,_+10,4)+4;_+=14;for(var g=0;g<38;g+=2)l.itree[g]=0,l.itree[g+1]=0;var b=1;for(g=0;g<h;g++){var m=i(r,_+3*g,3);l.itree[1+(l.ordr[g]<<1)]=m,m>b&&(b=m)}_+=3*h,o(l.itree,b),U(l.itree,b,l.imap),I=l.lmap,c=l.dmap,_=a(l.imap,(1<<b)-1,Z+s,r,_,l.ttree);var y=n._copyOut(l.ttree,0,Z,l.ltree);F=(1<<y)-1;var C=n._copyOut(l.ttree,Z,s,l.dtree);p=(1<<C)-1,o(l.ltree,y),U(l.ltree,y,I),o(l.dtree,C),U(l.dtree,C,c)}for(;;){var A=I[u(r,_)&F];_+=15&A;var x=A>>>4;if(x>>>8==0)e[w++]=x;else{if(256==x)break;var T=w+x-254;if(x>264){var k=l.ldef[x-257];T=w+(k>>>3)+i(r,_,7&k),_+=7&k}var R=c[u(r,_)&p];_+=15&R;var S=R>>>4,z=l.ddef[S],M=(z>>>4)+f(r,_,15&z);for(_+=15&z,d&&(e=UZIP.F._check(e,w+(1<<17)));w<T;)e[w]=e[w++-M],e[w]=e[w++-M],e[w]=e[w++-M],e[w]=e[w++-M];w=T}}}else{0!=(7&_)&&(_+=8-(7&_));var E=4+(_>>>3),L=r[E-4]|r[E-3]<<8;d&&(e=UZIP.F._check(e,w+L)),e.set(new t(r.buffer,r.byteOffset+E,L),w),_=E+L<<3,w+=L}return e.length==w?e:e.slice(0,w)},UZIP.F._check=function(r,e){var t=r.length;if(e<=t)return r;var n=new Uint8Array(Math.max(t<<1,e));return n.set(r,0),n},UZIP.F._decodeTiny=function(r,e,t,n,f,i){for(var a=UZIP.F._bitsE,o=UZIP.F._get17,U=0;U<t;){var u=r[o(n,f)&e];f+=15&u;var l=u>>>4;if(l<=15)i[U]=l,U++;else{var d=0,I=0;16==l?(I=3+a(n,f,2),f+=2,d=i[U-1]):17==l?(I=3+a(n,f,3),f+=3):18==l&&(I=11+a(n,f,7),f+=7);for(var c=U+I;U<c;)i[U]=d,U++}}return f},UZIP.F._copyOut=function(r,e,t,n){for(var f=0,i=0,a=n.length>>>1;i<t;){var o=r[i+e];n[i<<1]=0,n[1+(i<<1)]=o,o>f&&(f=o),i++}for(;i<a;)n[i<<1]=0,n[1+(i<<1)]=0,i++;return f},UZIP.F.makeCodes=function(r,e){for(var t,n,f,i,a=UZIP.F.U,o=r.length,U=a.bl_count,u=0;u<=e;u++)U[u]=0;for(u=1;u<o;u+=2)U[r[u]]++;var l=a.next_code;for(t=0,U[0]=0,n=1;n<=e;n++)t=t+U[n-1]<<1,l[n]=t;for(f=0;f<o;f+=2)0!=(i=r[f+1])&&(r[f]=l[i],l[i]++)},UZIP.F.codes2map=function(r,e,t){for(var n=r.length,f=UZIP.F.U.rev15,i=0;i<n;i+=2)if(0!=r[i+1])for(var a=i>>1,o=r[i+1],U=a<<4|o,u=e-o,l=r[i]<<u,d=l+(1<<u);l!=d;){t[f[l]>>>15-e]=U,l++}},UZIP.F.revCodes=function(r,e){for(var t=UZIP.F.U.rev15,n=15-e,f=0;f<r.length;f+=2){var i=r[f]<<e-r[f+1];r[f]=t[i]>>>n}},UZIP.F._putsE=function(r,e,t){t<<=7&e;var n=e>>>3;r[n]|=t,r[n+1]|=t>>>8},UZIP.F._putsF=function(r,e,t){t<<=7&e;var n=e>>>3;r[n]|=t,r[n+1]|=t>>>8,r[n+2]|=t>>>16},UZIP.F._bitsE=function(r,e,t){return(r[e>>>3]|r[1+(e>>>3)]<<8)>>>(7&e)&(1<<t)-1},UZIP.F._bitsF=function(r,e,t){return(r[e>>>3]|r[1+(e>>>3)]<<8|r[2+(e>>>3)]<<16)>>>(7&e)&(1<<t)-1},UZIP.F._get17=function(r,e){return(r[e>>>3]|r[1+(e>>>3)]<<8|r[2+(e>>>3)]<<16)>>>(7&e)},UZIP.F._get25=function(r,e){return(r[e>>>3]|r[1+(e>>>3)]<<8|r[2+(e>>>3)]<<16|r[3+(e>>>3)]<<24)>>>(7&e)},UZIP.F.U=function(){var r=Uint16Array,e=Uint32Array;return{next_code:new r(16),bl_count:new r(16),ordr:[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],of0:[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,999,999,999],exb:[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0,0],ldef:new r(32),df0:[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,65535,65535],dxb:[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,0,0],ddef:new e(32),flmap:new r(512),fltree:[],fdmap:new r(32),fdtree:[],lmap:new r(32768),ltree:[],ttree:[],dmap:new r(32768),dtree:[],imap:new r(512),itree:[],rev15:new r(32768),lhst:new e(286),dhst:new e(30),ihst:new e(19),lits:new e(15e3),strt:new r(65536),prev:new r(32768)}}(),function(){for(var r=UZIP.F.U,e=0;e<32768;e++){var t=e;t=(4278255360&(t=(4042322160&(t=(3435973836&(t=(2863311530&t)>>>1|(1431655765&t)<<1))>>>2|(858993459&t)<<2))>>>4|(252645135&t)<<4))>>>8|(16711935&t)<<8,r.rev15[e]=(t>>>16|t<<16)>>>17}function n(r,e,t){for(;0!=e--;)r.push(0,t)}for(e=0;e<32;e++)r.ldef[e]=r.of0[e]<<3|r.exb[e],r.ddef[e]=r.df0[e]<<4|r.dxb[e];n(r.fltree,144,8),n(r.fltree,112,9),n(r.fltree,24,7),n(r.fltree,8,8),UZIP.F.makeCodes(r.fltree,9),UZIP.F.codes2map(r.fltree,9,r.flmap),UZIP.F.revCodes(r.fltree,9),n(r.fdtree,32,5),UZIP.F.makeCodes(r.fdtree,5),UZIP.F.codes2map(r.fdtree,5,r.fdmap),UZIP.F.revCodes(r.fdtree,5),n(r.itree,19,0),n(r.ltree,286,0),n(r.dtree,30,0),n(r.ttree,320,0)}(),function(r){"undefined"==typeof DO_NOT_EXPORT_CRC?"object"==typeof exports?r(exports):"function"==typeof define&&define.amd?define((function(){var e={};return r(e),e})):r(CRC32={}):r(CRC32={})}((function(r){r.version="1.2.2";var e=function(){for(var r=0,e=new Array(256),t=0;256!=t;++t)r=1&(r=1&(r=1&(r=1&(r=1&(r=1&(r=1&(r=1&(r=t)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1)?-306674912^r>>>1:r>>>1,e[t]=r;return"undefined"!=typeof Int32Array?new Int32Array(e):e}();var t=function(r){var e=0,t=0,n=0,f="undefined"!=typeof Int32Array?new Int32Array(4096):new Array(4096);for(n=0;256!=n;++n)f[n]=r[n];for(n=0;256!=n;++n)for(t=r[n],e=256+n;e<4096;e+=256)t=f[e]=t>>>8^r[255&t];var i=[];for(n=1;16!=n;++n)i[n-1]="undefined"!=typeof Int32Array?f.subarray(256*n,256*n+256):f.slice(256*n,256*n+256);return i}(e),n=t[0],f=t[1],i=t[2],a=t[3],o=t[4],U=t[5],u=t[6],l=t[7],d=t[8],I=t[9],c=t[10],v=t[11],P=t[12],Z=t[13],s=t[14];r.table=e,r.bstr=function(r,t){for(var n=-1^t,f=0,i=r.length;f<i;)n=n>>>8^e[255&(n^r.charCodeAt(f++))];return~n},r.buf=function(r,t){for(var h=-1^t,F=r.length-15,p=0;p<F;)h=s[r[p++]^255&h]^Z[r[p++]^h>>8&255]^P[r[p++]^h>>16&255]^v[r[p++]^h>>>24]^c[r[p++]]^I[r[p++]]^d[r[p++]]^l[r[p++]]^u[r[p++]]^U[r[p++]]^o[r[p++]]^a[r[p++]]^i[r[p++]]^f[r[p++]]^n[r[p++]]^e[r[p++]];for(F+=15;p<F;)h=h>>>8^e[255&(h^r[p++])];return~h},r.str=function(r,t){for(var n=-1^t,f=0,i=r.length,a=0,o=0;f<i;)(a=r.charCodeAt(f++))<128?n=n>>>8^e[255&(n^a)]:a<2048?n=(n=n>>>8^e[255&(n^(192|a>>6&31))])>>>8^e[255&(n^(128|63&a))]:a>=55296&&a<57344?(a=64+(1023&a),o=1023&r.charCodeAt(f++),n=(n=(n=(n=n>>>8^e[255&(n^(240|a>>8&7))])>>>8^e[255&(n^(128|a>>2&63))])>>>8^e[255&(n^(128|o>>6&15|(3&a)<<4))])>>>8^e[255&(n^(128|63&o))]):n=(n=(n=n>>>8^e[255&(n^(224|a>>12&15))])>>>8^e[255&(n^(128|a>>6&63))])>>>8^e[255&(n^(128|63&a))];return~n}}));
+
+/* bin.js 2023-09-22 */
+
+var bin=new bintools;function bintools(){}bintools.prototype.assert=function(assertion){if(!(assertion===true)){console.trace();throw"ERROR"}};bintools.prototype.toHex=function(arr){this.assert(arr instanceof Uint8Array);return arr.reduce(((hex,b)=>hex+b.toString(16).padStart(2,"0")),"")};bintools.prototype.fromHex=function(txt){this.assert(typeof txt==="string");let hex=txt.replace(/[^a-fA-f0-9]/g,"");this.assert(hex.length%2==0);return new Uint8Array(hex.match(/.{1,2}/g).map((b=>parseInt(b,16))))};bintools.prototype.toBase64=function(arr){this.assert(arr instanceof Uint8Array);return btoa(this.toString(arr))};bintools.prototype.fromBase64=function(txt){this.assert(typeof txt==="string");return this.fromString(atob(txt))};bintools.prototype.toSafeBase64=function(arr){this.assert(arr instanceof Uint8Array);return this.toBase64(arr).replace(/\//g,"_").replace(/\+/g,"-").replace(/\=/g,"")};bintools.prototype.fromSafeBase64=function(txt){this.assert(typeof txt==="string");return this.fromBase64(txt.replace(/_/g,"/").replace(/-/g,"+"))};bintools.prototype.toString=function(arr){this.assert(arr instanceof Uint8Array);let result="";for(let i=0;i<arr.length;i++)result+=String.fromCharCode(arr[i]);return result};bintools.prototype.fromString=function(txt){this.assert(typeof txt==="string");return new Uint8Array(txt.split("").map((s=>s.charCodeAt(0))))};bintools.prototype.getRandomBytes=function(size){this.assert(typeof size==="number"&&size>0);let randomBytes=new Uint8Array(size);if(size<=65536){window.crypto.getRandomValues(randomBytes)}else{let buf=new Uint8Array(65536);let bufIndex=0;window.crypto.getRandomValues(buf);for(let i=0;i<size;i++){if(bufIndex==buf.length){bufIndex=0;window.crypto.getRandomValues(buf)}randomBytes[i]=buf[bufIndex];bufIndex++}}return randomBytes};bintools.prototype.getRandomGuid=function(){let s=this.toHex(this.getRandomBytes(16));return s.substring(0,8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20)};bintools.prototype.xor=function(...baArray){this.assert(baArray.length>1);let length=-1;for(let ba of baArray){if(length==-1)length=ba.length;this.assert(ba instanceof Uint8Array);this.assert(ba.length==length)}let result=new Uint8Array(length);let ba=baArray[0];for(let i=0;i<length;i++)result[i]=ba[i];for(let i=1;i<baArray.length;i++){ba=baArray[i];for(let j=0;j<length;j++){result[j]=result[j]^ba[j]}}return result};bintools.prototype.merge=function(...baArray){this.assert(baArray.length>1);let count=0;let size=0;for(let ba of baArray){this.assert(ba instanceof Uint8Array);size+=ba.length}let result=new Uint8Array(size);for(let ba of baArray){result.set(ba,count);count+=ba.length}return result};
+
+class Status {
+  constructor(total) {
+    this.beginTime = Date.now();
+    this.count = 0;
+    this.lastUpdate = 0;
+    this.msg = "";
+    this.total = total;
+  }
+  update(progress) {
+    this.count = progress;
+    let now = Date.now();
+    let elapsed = now - this.beginTime;
+    let percent = (100 * this.count / this.total);
+    let bps = 1000 * this.count / elapsed;
+    let eta = (this.total - this.count) / bps;
+    if (this.count == this.total) {
+      if (this.total == 0) {
+        this.msg = "COMPLETED: " + elapsed + " ms";
+      }
+      else {
+        this.msg = "COMPLETED: " + this.total.toLocaleString() + " bytes in " +
+          (elapsed / 1000).toFixed(1) + " s at " + (bps / 1000000).toFixed(1) + " MB/s";
+      }
+    }
+    else if (elapsed > 0 && now - this.lastUpdate > 500) {
+      this.lastUpdate = now;
+      this.msg = "PROCESSING: " + percent.toFixed(1) + " %, ETA: " + Math.ceil(eta) +
+        " s, "  + (bps / 1000000).toFixed(1) + " MB/s";
+    }
+    return this.msg;
+  }
+}
+
+var archive = {};
+var archiveFileName = "";
+var manifest = {};
+
+function id(i) {
+  return document.getElementById(i);
+}
+
+function debug(...txtArray) {
+  if (id("debug").value != "true") return;
+  let date = new Date();
+  let result = date.getFullYear().toString() + "-" +
+    (date.getMonth() + 1).toString().padStart(2, "0") + "-" +
+    date.getDate().toString().padStart(2, "0") + " " +
+    date.getHours().toString().padStart(2, "0") + ":" +
+    date.getMinutes().toString().padStart(2, "0") + ":" +
+    date.getSeconds().toString().padStart(2, "0") + "." +
+    date.getMilliseconds().toString().padStart(3, "0");
+  for (let txt of txtArray) result += " [" + txt + "]";
+  console.log(result);
+}
+
+async function sha256(data) {
+  return new Uint8Array(await window.crypto.subtle.digest("SHA-256", data));
+}
+
+async function checksum(data) {
+  return (await sha256(data)).slice(0, 2);
+}
+
+async function EVP_BytesToKey(pass, salt) {
+  let rounds = 3, nk = 8, key = [], iv = [], hash = [], result = [], tmp = bin.merge(pass, salt);
+  hash[0] = await sha256(tmp);
+  result = hash[0];
+  for (let i = 1; i < rounds; i++) {
+    hash[i] = await sha256(bin.merge(hash[i - 1], tmp));
+    result = bin.merge(result, hash[i]);
+  }
+  key = result.slice(0, 4 * nk);
+  iv = result.slice(4 * nk, 4 * nk + 16);
+  return { key: key, iv: iv };
+}
+
+function crc(buf) {
+  let status = new Status(buf.length);
+  let result = (UZIP.crc.crc(buf, 0, buf.length) >>> 0).toString(16).padStart(8, "0");
+  if (buf.length >= 10 * 1000 * 1000) debug("crc", status.update(buf.length));
+  return result;
+}
+
+function timestamp() {
+  let date = new Date();
+  return date.getFullYear().toString() +
+    (date.getMonth() + 1).toString().padStart(2, "0") +
+    date.getDate().toString().padStart(2, "0") + "-" +
+    date.getHours().toString().padStart(2, "0") +
+    date.getMinutes().toString().padStart(2, "0") +
+    date.getSeconds().toString().padStart(2, "0");
+}
+
+function getKey() {
+  let key = id("key").value.trim();
+  return key.length == 0 ? null : bin.fromString(key);
+}
+
+function filterinput() {
+  updateEntryList();
+  selectEntry();
+}
+
+async function keyinput() {
+  let key = getKey();
+  if (key == null) {
+    id("enc").disabled = true;
+  }
+  else {
+    id("enc").disabled = false;
+    let sum = bin.toHex(await sha256(key)).substring(0, 2).toUpperCase();
+    id("heading").innerHTML = (key.length < 8) ? document.title : document.title + " (" + sum + ")";
+  }
+}
+
+function clearFile() {
+  id("save").innerHTML = "";
+  URL.revokeObjectURL(id("save").href);
+}
+
+function getSelectedOption() {
+  let list = id("list");
+  return (list.selectedIndex == -1) ? null : list.options[list.selectedIndex];
+}
+
+function edit() {
+  clearFile();
+  let option = getSelectedOption();
+  let fileName = option.name;
+  let data = new Uint8Array(bin.fromString(id("txt").value));
+  archive[fileName] = data;
+  let mtime = toZipTime(Date.now());
+  manifest[fileName] = { crc: crc(data), mtime: mtime, size: data.length };
+  option.text = createOptionText(fileName);
+}
+
+function ascii(bytes) {
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] != 10 && bytes[i] != 13 && (bytes[i] < 32 || bytes[i] > 126)) return false;
+  }
+  return true;
+}
+
+function saveFile(fileName, fileData) {
+  clearFile();
+  let simpleFileName = fileName.split("/").pop().split("\\").pop();
+  id("save").href = URL.createObjectURL(new Blob([fileData], { type: "application/octet-stream" }));
+  id("save").innerHTML = simpleFileName;
+  id("save").setAttribute("download", simpleFileName);
+}
+
+function serializeArchive(nocompress) {
+  let status = new Status(0);
+  let zipBytes = UZIP.encode(archive, nocompress, manifest);
+  let manifestTemp = UZIP.parse(zipBytes, true);
+  for (let fileName in manifest) {
+    if (manifest[fileName].crc != manifestTemp[fileName].crc) {
+      clearArchive();
+      alert("ZIP FAILED");
+      return null;
+    }
+  }
+  let result = new Uint8Array(zipBytes);
+  status.total = result.length;
+  debug("serializeArchive", status.update(result.length));
+  return result;
+}
+
+function createOptionText(fileName) {
+  let mani = manifest[fileName];
+  let size = mani.size + "b";
+  if (mani.size > 1000) size = Math.ceil(mani.size / 1000) + "kb";
+  if (mani.size > 1000000) size = Math.ceil(mani.size / 1000000) + "mb";
+  return fileName + " (" + mani.crc + ") " + size + " [" + fromZipTime(mani.mtime) + "]";
+}
+
+function updateEntryList() {
+  clearFile();
+  id("download").disabled = true;
+  id("edit").disabled = true;
+  id("remove").disabled = true;
+  id("rename").disabled = true;
+  let filter = id("filter").value.trim().toLowerCase().split(' ');
+  let list = id("list");
+  while (list.options.length > 0) list.remove(0);
+  let fileNameList = Object.keys(manifest);
+  fileNameList.sort((f1, f2) => f1.toLowerCase().localeCompare(f2.toLowerCase()));
+  fileNameList.forEach(name => {
+    if (filter.every(f => name.toLowerCase().includes(f))) {
+      let option = document.createElement("option");
+      option.name = name;
+      option.text = createOptionText(name);
+      list.add(option);
+    }
+  });
+  id("count").innerHTML = (fileNameList.length == 0) ? "" : fileNameList.length;
+}
+
+function fromZipTime(time) {
+  let year = ((time >> 25) + 1980).toString();
+  let month = ((time >> 21) & 0b1111).toString().padStart(2, "0");
+  let day = ((time >> 16) & 0b11111).toString().padStart(2, "0");
+  let hour = ((time >> 11) & 0b11111).toString().padStart(2, "0");
+  let min = ((time >> 5) & 0b111111).toString().padStart(2, "0");
+  return year + "-" + month + "-" + day + " " + hour + ":" + min;
+}
+
+function toZipTime(time) {
+  let date = new Date(time);
+  return ((date.getFullYear() - 1980) << 25) | ((date.getMonth() + 1) << 21) | (date.getDate() << 16) |
+    (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >>> 1);
+}
+
+function addEntry(fileName, fileBytes, fileLastModified) {
+  if (manifest[fileName]) {
+    alert("ADD FAILED");
+  }
+  else {
+    let mtime = toZipTime(fileLastModified);
+    manifest[fileName] = { crc: crc(fileBytes), mtime: mtime, size: fileBytes.length };
+    archive[fileName] = fileBytes;
+  }
+  updateEntryList();
+  id("list").value = createOptionText(fileName);
+  selectEntry();
+}
+
+function createEntry() {
+  addEntry(Date.now() + ".txt", new Uint8Array(0), Date.now());
+}
+
+function removeArchiveFolders(files) {
+  for (var fileName in files) {
+    if (fileName.endsWith("/")) {
+      delete files[fileName];
+    }
+  }
+}
+
+function clearArchive() {
+  manifest = {};
+  archive = {};
+  updateEntryList();
+}
+
+function loadArchive(archiveBytes) {
+  if (!archiveBytes || archiveBytes.length == 0) return false;
+  let status = new Status(archiveBytes.length);
+  manifest = UZIP.parse(archiveBytes, true);
+  removeArchiveFolders(manifest);
+  archive = UZIP.parse(archiveBytes, false);
+  removeArchiveFolders(archive);
+  for (let fileName in manifest) {
+    if (manifest[fileName].crc != crc(archive[fileName])) {
+      clearArchive();
+      return false;
+    }
+  }
+  updateEntryList();
+  selectEntry();
+  debug("loadArchive", status.update(archiveBytes.length));
+  return true;
+}
+
+async function encrypt(key, data) {
+  if (!data || !key) return null;
+  let status = new Status(data.length);
+  let plain = data;
+  let nonce = bin.getRandomBytes(6);
+  let sum = await checksum(bin.merge(nonce, key, await sha256(plain)));
+  let salt = bin.merge(sum, nonce);
+  let hash = await EVP_BytesToKey(key, salt);
+  let params = { name: "AES-CBC", iv: hash.iv };
+  let ik = await window.crypto.subtle.importKey("raw", hash.key, "AES-CBC", false, ["encrypt"]);
+  let cipher = new Uint8Array(await window.crypto.subtle.encrypt(params, ik, plain));
+  let result = bin.merge(bin.fromString("Salted__"), salt, cipher);
+  debug("encrypt", status.update(data.length));
+  return result;
+}
+
+async function decrypt(key, data) {
+  if (!data || !key) return null;
+  let status = new Status(data.length);
+  let salt = data.slice(8, 16);
+  let sum = bin.toHex(salt.slice(0, 2));
+  let nonce = salt.slice(2, 8);
+  let cipher = data.slice(16);
+  let hash = await EVP_BytesToKey(key, salt);
+  let params = { name: "AES-CBC", iv: hash.iv };
+  let ik = await window.crypto.subtle.importKey("raw", hash.key, "AES-CBC", false, ["decrypt"]);
+  let plain = new Uint8Array();
+  try { plain = new Uint8Array(await window.crypto.subtle.decrypt(params, ik, cipher)); }
+  catch (e) { console.warn(e); }
+  if (sum != bin.toHex(await checksum(bin.merge(nonce, key, await sha256(plain))))) alert("CHECKSUM ERROR");
+  debug("decrypt", status.update(data.length));
+  return plain;
+}
+
+function downloadEntry() {
+  let option = getSelectedOption();
+  if (option) {
+    let fileName = option.name;
+    saveFile(fileName, archive[fileName]);
+  }
+}
+
+function removeEntry() {
+  let list = id("list");
+  let option = getSelectedOption();
+  let optionIndex = 0;
+  if (option) {
+    optionIndex = option.index;
+    let fileName = option.name;
+    delete manifest[fileName];
+    delete archive[fileName];
+  }
+  updateEntryList();
+  if (optionIndex > 0) {
+    list.value = list.options[optionIndex - 1].value;
+    selectEntry();
+  }
+}
+
+function renameEntry() {
+  let option = getSelectedOption();
+  let newFileName;
+  if (option) {
+    let fileName = option.name;
+    newFileName = prompt("New Name:", fileName);
+    if (manifest[newFileName] || newFileName.startsWith("/") || newFileName.endsWith("/")) {
+      alert("RENAME FAILED");
+    }
+    else {
+      manifest[newFileName] = manifest[fileName];
+      archive[newFileName] = archive[fileName];
+      delete manifest[fileName];
+      delete archive[fileName];
+    }
+  }
+  updateEntryList();
+  if (newFileName) {
+    id("list").value = createOptionText(newFileName);
+    selectEntry();
+  }
+}
+
+function selectEntry() {
+  let list = id("list");
+  id("download").disabled = (list.selectedIndex == -1);
+  id("remove").disabled = (list.selectedIndex == -1);
+  id("rename").disabled = (list.selectedIndex == -1);
+  let option = getSelectedOption();
+  if (option) {
+    let fileName = option.name;
+    let size = manifest[fileName].size
+    let ext = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+    id("mpgdiv").style.display = "none";
+    id("mpgdiv").innerHTML = "";
+    id("pdfdiv").style.display = "none";
+    id("pdfdiv").innerHTML = "";
+    id("picdiv").style.display = "none";
+    id("txtdiv").style.display = "none";
+    id("txt").disabled = true;
+    id("txt").value = "";
+    id("edit").disabled = true;
+    if (size == 0 || (size < 1000 * 1000 && ascii(archive[fileName]))) {
+      id("txtdiv").style.display = "block";
+      id("txt").disabled = false;
+      id("txt").value = new TextDecoder().decode(archive[fileName]);
+      id("edit").disabled = false;
+    }
+    else if (["bmp", "gif", "jpg", "jpeg", "png", "tif", "tiff"].includes(ext) && size < 10 * 1000 * 1000) {
+      id("picdiv").style.display = "block";
+      let picData = bin.toBase64(archive[fileName]);
+      id("pic").src = "data:image/jpeg;base64," + picData;
+      let offset = id("picdiv").getBoundingClientRect().top - document.body.getBoundingClientRect().top;
+      id("pic").style.maxHeight = (window.innerHeight - offset - 35) + "px";
+      id("piclink").href = URL.createObjectURL(new Blob([archive[fileName]], { type: "image/jpeg" }));
+    }
+    else if (["aac", "mkv", "mov", "mp3", "mp4", "webm", "wma", "wmv"].includes(ext) && size < 1000 * 1000 * 1000) {
+      id("mpgdiv").style.display = "block";
+      let video = document.createElement("video");
+      let offset = id("mpgdiv").getBoundingClientRect().top - document.body.getBoundingClientRect().top;
+      video.style.maxHeight = (window.innerHeight - offset - 35) + "px";
+      video.setAttribute("controls", "");
+      let source = document.createElement("source");
+      let fileData = archive[fileName];
+      source.setAttribute("src", URL.createObjectURL(new Blob([fileData], { type: "application/octet-stream" })));
+      source.setAttribute("type", "video/mp4");
+      id("mpgdiv").appendChild(video);
+      video.appendChild(source);
+      video.load();
+    }
+    else if (["pdf"].includes(ext) && size < 100 * 1000 * 1000) {
+      id("pdfdiv").style.display = "block";
+      let pdf = document.createElement("object");
+      let fileData = archive[fileName];
+      let offset = id("pdfdiv").getBoundingClientRect().top - document.body.getBoundingClientRect().top;
+      let pdfheight = (id("pdfheight").value > 0 && id("pdfheight").value < 2000) ? id("pdfheight").value : window.innerHeight - offset - 35;
+      pdf.setAttribute("data", URL.createObjectURL(new Blob([fileData], { type: "application/pdf" })));
+      pdf.setAttribute("type", "application/pdf");
+      pdf.setAttribute("height", pdfheight + "px");
+      pdf.setAttribute("width", "95%");
+      id("pdfdiv").appendChild(pdf);
+    }
+  }
+}
+
+async function enc() {
+  id("enc").disabled = true;
+  let status = new Status(0);
+  let ext = ".zip.aes";
+  let fileName = archiveFileName;
+  if (fileName == "") {
+    fileName = (Object.keys(manifest).length == 1) ? Object.keys(manifest)[0] + ext : "data";
+  }
+  let prefix = fileName.split(".").shift().split("-").shift();
+  let fileBytes = await encrypt(getKey(), serializeArchive(true));
+  saveFile(prefix + "-" + timestamp() + "-" + crc(fileBytes).substring(0, 4) + ext, fileBytes);
+  status.total = fileBytes.length;
+  debug("enc", status.update(fileBytes.length));
+  id("enc").disabled = false;
+}
+
+function zip() {
+  let status = new Status(0);
+  let serialized = serializeArchive(false);
+  saveFile("data.zip", serialized);
+  status.total = serialized.length;
+  debug("zip", status.update(serialized.length));
+}
+
+function digest(alg) {
+  let result = "";
+  let fileNameList = Object.keys(manifest);
+  fileNameList.sort((f1, f2) => f1.toLowerCase().localeCompare(f2.toLowerCase()));
+  fileNameList.forEach(name => {
+    result += (alg == "crc" ? manifest[name].crc : SparkMD5.ArrayBuffer.hash(archive[name])) + " " + name + "\n";
+  });
+  saveFile(alg == "crc" ? "crc.txt" : "md5.txt", result);
+}
+
+function uploadFileChangeListener() {
+    clearFile();
+    if (this.files.length == 0) return;
+    let file = this.files[0];
+    let reader = new FileReader();
+    let isEmptyArchive = (Object.keys(manifest).length == 0);
+    let isDecryptMode = file.name.endsWith(".zip.aes");
+    if (isDecryptMode) clearArchive();
+    let isUnzipMode = isEmptyArchive && file.name.endsWith(".zip");
+    let onloadStatus = new Status(file.size);
+    let readerStatus = new Status(file.size);
+    reader.onload = async function() {
+      debug("reader", readerStatus.update(file.size));
+      let fileBytes = new Uint8Array(reader.result);
+      if (isDecryptMode) {
+        archiveFileName = file.name;
+        let archiveBytes = await decrypt(getKey(), fileBytes);
+        if (!loadArchive(archiveBytes)) alert("LOAD FAILED");
+      }
+      else if (isUnzipMode) {
+        archiveFileName = file.name;
+        if (!loadArchive(fileBytes)) alert("LOAD FAILED");
+      }
+      else {
+        addEntry(file.name, fileBytes, file.lastModified);
+      }
+      id("list").focus();
+      debug("onload", onloadStatus.update(file.size));
+    }
+    reader.readAsArrayBuffer(file);
+}
+
+async function init() {
+  clearArchive();
+  let title = "Zip";
+  document.title = title;
+  id("mpgdiv").style.display = "none";
+  id("pdfdiv").style.display = "none";
+  id("picdiv").style.display = "none";
+  id("txtdiv").style.display = "none";
+  id("enc").disabled = true;
+  id("enc").innerHTML = "AES";
+  id("heading").innerHTML = title;
+  id("key").value = "";
+  id("download").disabled = true;
+  id("edit").disabled = true;
+  id("filter").value = "";
+  id("remove").disabled = true;
+  id("rename").disabled = true;
+  id("upload").value = "";
+  clearFile();
+  id("upload").addEventListener("change", uploadFileChangeListener);
+  let params = new URLSearchParams(window.location.search);
+  for (let k of params.keys()) { if (id(k)) id(k).value = params.get(k); }
+  id("txt").rows = (id("txtrows").value > 0 && id("txtrows").value < 100) ? id("txtrows").value : 15;
+  await keyinput();
+  id("key").focus();
+  debug("init");
+}
+
+</script>
+<style>
+html { font-family: Courier, Monospace; font-size: 16px; }
+body { background-color: #FFFFFF; color: #000000; font-family: inherit; font-size: inherit; }
+button { width: 17%; font-family: inherit; font-size: inherit; }
+img { max-width: 95%; }
+input { width: 45%; font-family: inherit; font-size: inherit; }
+select { width: 70%; font-family: inherit; font-size: inherit; }
+textarea { width: 95%; font-family: inherit; font-size: inherit; }
+video { max-width: 95%; }
+</style>
+</head>
+<body onload="init()">
+<h2 id="heading"></h2>
+<input id="debug" type="hidden" />
+<input id="pdfheight" type="hidden" />
+<input id="txtrows" type="hidden" />
+<input id="key" oninput="keyinput()" placeholder="key" type="password" />
+<input id="upload" type="file" />
+<br>
+<br>
+<button id="crc" onclick="digest('crc')" type="button">CRC</button>
+<button id="md5" onclick="digest('md5')" type="button">MD5</button>
+<button id="zip" onclick="zip()" type="button">ZIP</button>
+<button id="enc" onclick="enc()" type="button">AES</button>
+<a id="save"></a>
+<br>
+<br>
+<input id="filter" oninput="filterinput()" placeholder="filter" size="6" style="width:auto" />
+<select id="list" onchange="selectEntry()"></select>
+<span id="count"></span>
+<br>
+<br>
+<button id="remove" onclick="removeEntry()" type="button">DEL</button>
+<button id="download" onclick="downloadEntry()" type="button">GET</button>
+<button id="create" onclick="createEntry()" type="button">NEW</button>
+<button id="rename" onclick="renameEntry()" type="button">REN</button>
+<button id="edit" onclick="edit()" type="button">SAVE</button>
+<br>
+<br>
+<div id="mpgdiv"></div>
+<div id="pdfdiv"></div>
+<div id="picdiv"><a id="piclink" target="_blank"><img id="pic"></a></div>
+<div id="txtdiv"><textarea id="txt"></textarea></div>
+</body>
+</html>

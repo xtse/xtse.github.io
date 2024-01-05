@@ -1,0 +1,199 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width">
+<script>
+
+/* OpenSSL Sign: openssl dgst -sign private.pem test.dat > signature.bin
+
+/* OpenSSL Verify: openssl dgst -verify public.pem -signature signature.bin test.dat
+
+/* chacha-js (https://github.com/skeeto/chacha-js) */
+
+function ChaCha(key,iv){"use strict";const CHACHA_ROUNDS=20;const CHACHA_KEYSIZE=32;const CHACHA_IVSIZE=8;if(key.byteLength<CHACHA_KEYSIZE)throw new Error("key too short");if(iv.byteLength<CHACHA_IVSIZE)throw new Error("IV too short");const state=new Uint32Array(16);let view=new DataView(key);state[0]=1634760805;state[1]=857760878;state[2]=2036477234;state[3]=1797285236;state[4]=view.getUint32(0,true);state[5]=view.getUint32(4,true);state[6]=view.getUint32(8,true);state[7]=view.getUint32(12,true);state[8]=view.getUint32(16,true);state[9]=view.getUint32(20,true);state[10]=view.getUint32(24,true);state[11]=view.getUint32(28,true);view=new DataView(iv);state[14]=view.getUint32(0,true);state[15]=view.getUint32(4,true);const output=new Uint32Array(16);const outview=new DataView(output.buffer);return function(){function quarterround(x,a,b,c,d){function rotate(v,n){return v<<n|v>>>32-n}x[a]+=x[b];x[d]=rotate(x[d]^x[a],16);x[c]+=x[d];x[b]=rotate(x[b]^x[c],12);x[a]+=x[b];x[d]=rotate(x[d]^x[a],8);x[c]+=x[d];x[b]=rotate(x[b]^x[c],7)}output.set(state);for(let i=0;i<CHACHA_ROUNDS;i+=2){quarterround(output,0,4,8,12);quarterround(output,1,5,9,13);quarterround(output,2,6,10,14);quarterround(output,3,7,11,15);quarterround(output,0,5,10,15);quarterround(output,1,6,11,12);quarterround(output,2,7,8,13);quarterround(output,3,4,9,14)}for(let i=0;i<16;i++)outview.setUint32(i*4,output[i]+state[i],true);state[12]++;if(state[12]==0){state[13]++;if(state[13]==0){throw new Error("output exhausted")}}return output.buffer}}function ChaCha20(key,iv){let chacha=new ChaCha(key.buffer,iv.buffer);let buffer=new Uint8Array(chacha());let bufferIndex=0;return function(size){let result=new Uint8Array(size);for(let resultIndex=0;resultIndex<size;resultIndex++){if(bufferIndex==64){buffer=new Uint8Array(chacha());bufferIndex=0}result[resultIndex]=buffer[bufferIndex];bufferIndex++}return result}}
+
+/* bin.js 2023-09-22 */
+
+var bin=new bintools;function bintools(){}bintools.prototype.assert=function(assertion){if(!(assertion===true)){console.trace();throw"ERROR"}};bintools.prototype.toHex=function(arr){this.assert(arr instanceof Uint8Array);return arr.reduce(((hex,b)=>hex+b.toString(16).padStart(2,"0")),"")};bintools.prototype.fromHex=function(txt){this.assert(typeof txt==="string");let hex=txt.replace(/[^a-fA-f0-9]/g,"");this.assert(hex.length%2==0);return new Uint8Array(hex.match(/.{1,2}/g).map((b=>parseInt(b,16))))};bintools.prototype.toBase64=function(arr){this.assert(arr instanceof Uint8Array);return btoa(this.toString(arr))};bintools.prototype.fromBase64=function(txt){this.assert(typeof txt==="string");return this.fromString(atob(txt))};bintools.prototype.toSafeBase64=function(arr){this.assert(arr instanceof Uint8Array);return this.toBase64(arr).replace(/\//g,"_").replace(/\+/g,"-").replace(/\=/g,"")};bintools.prototype.fromSafeBase64=function(txt){this.assert(typeof txt==="string");return this.fromBase64(txt.replace(/_/g,"/").replace(/-/g,"+"))};bintools.prototype.toString=function(arr){this.assert(arr instanceof Uint8Array);let result="";for(let i=0;i<arr.length;i++)result+=String.fromCharCode(arr[i]);return result};bintools.prototype.fromString=function(txt){this.assert(typeof txt==="string");return new Uint8Array(txt.split("").map((s=>s.charCodeAt(0))))};bintools.prototype.getRandomBytes=function(size){this.assert(typeof size==="number"&&size>0);let randomBytes=new Uint8Array(size);if(size<=65536){window.crypto.getRandomValues(randomBytes)}else{let buf=new Uint8Array(65536);let bufIndex=0;window.crypto.getRandomValues(buf);for(let i=0;i<size;i++){if(bufIndex==buf.length){bufIndex=0;window.crypto.getRandomValues(buf)}randomBytes[i]=buf[bufIndex];bufIndex++}}return randomBytes};bintools.prototype.getRandomGuid=function(){let s=this.toHex(this.getRandomBytes(16));return s.substring(0,8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20)};bintools.prototype.xor=function(...baArray){this.assert(baArray.length>1);let length=-1;for(let ba of baArray){if(length==-1)length=ba.length;this.assert(ba instanceof Uint8Array);this.assert(ba.length==length)}let result=new Uint8Array(length);let ba=baArray[0];for(let i=0;i<length;i++)result[i]=ba[i];for(let i=1;i<baArray.length;i++){ba=baArray[i];for(let j=0;j<length;j++){result[j]=result[j]^ba[j]}}return result};bintools.prototype.merge=function(...baArray){this.assert(baArray.length>1);let count=0;let size=0;for(let ba of baArray){this.assert(ba instanceof Uint8Array);size+=ba.length}let result=new Uint8Array(size);for(let ba of baArray){result.set(ba,count);count+=ba.length}return result};
+
+var PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEf60zJs+zhk6gHl7cHwm4VqvhYkRN" +
+  "p8uyfs1PTicUEpPvCvYJmEVuls4M85EC4G9C0UnEzcYEA+K931i6ib1axw==";
+
+var IMPORT_ALGO = { name: "ECDSA", namedCurve: "P-256" };
+
+var HASH_ALGO = { name: "ECDSA", hash: { name: "SHA-256" } };
+
+function id(i) {
+  return document.getElementById(i);
+}
+
+function value(i) {
+  return id(i).value.trim();
+}
+
+async function sha256(data) {
+  return new Uint8Array(await window.crypto.subtle.digest("SHA-256", data));
+}
+
+async function pbkdf2(pass, salt, iterations) {
+  let ik = await window.crypto.subtle.importKey("raw", pass, "PBKDF2", false, ["deriveBits"]);
+  let params = { name: "PBKDF2", salt: salt, iterations: iterations, hash: "SHA-256" };
+  return new Uint8Array(await window.crypto.subtle.deriveBits(params, ik, 256));
+}
+
+async function kdf(pass, salt, mb, rounds) {
+  let key = firstkey = await pbkdf2(await sha256(pass), await sha256(salt), 1024 * mb * rounds);
+  let arr = [], hashes = [], last = new Uint8Array(4096 * mb);
+  let params = { name: "AES-GCM", iv: new Uint8Array(12) };
+  let ik = await window.crypto.subtle.importKey("raw", key.slice(0, 16), "AES-GCM", false, ["encrypt"]);
+  for (let i = 0; i < rounds; i++) {
+    for (let j = 0; j < 256; j++) {
+      last = arr[j] = new Uint8Array(await window.crypto.subtle.encrypt(params, ik, last));
+    }
+  }
+  key = await pbkdf2(key, await sha256(last), 1);
+  for (let i = 0; i < 256; i++) {
+    let row = new Uint8Array(8);
+    for (let j = 0; j < 8; j++) {
+      row[j] = arr[i][new DataView(key.slice(j * 4, (j + 1) * 4).buffer).getUint32() % arr[i].length];
+    }
+    key = await pbkdf2(key, row, 1);
+  }
+  return await sha256(bin.merge(firstkey, key));
+}
+
+async function encryptChaCha(key, data) {
+  let plain = data;
+  let nonce = bin.getRandomBytes(4);
+  let dk = await kdf(key, nonce, 64, 1);
+  let checksum = (await sha256(bin.merge(dk, plain))).slice(0, 2);
+  let chacha20 = new ChaCha20(await sha256(bin.merge(dk, checksum)), new Uint8Array(8));
+  let cipher = bin.xor(plain, chacha20(plain.length));
+  return bin.merge(checksum, nonce, cipher);
+}
+
+async function decryptChaCha(key, data) {
+  let expectedChecksum = data.slice(0, 2);
+  let nonce = data.slice(2, 6);
+  let cipher = data.slice(6);
+  let dk = await kdf(key, nonce, 64, 1);
+  let chacha20 = new ChaCha20(await sha256(bin.merge(dk, expectedChecksum)), new Uint8Array(8));
+  let plain = bin.xor(cipher, chacha20(cipher.length));
+  let actualChecksum = (await sha256(bin.merge(dk, plain))).slice(0, 2);
+  if (bin.toHex(expectedChecksum) == bin.toHex(actualChecksum)) {
+    return plain;
+  }
+  else {
+    throw new Error();
+  }
+}
+
+async function encrypt(keyString, dataString) {
+  return bin.toSafeBase64(await encryptChaCha(bin.fromString(keyString), bin.fromString(dataString)));
+}
+
+async function decrypt(keyString, dataString) {
+  return await decryptChaCha(bin.fromString(keyString), bin.fromSafeBase64(dataString));
+}
+
+async function genKeyPair() {
+  let pair = await window.crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+  let privateKey = await window.crypto.subtle.exportKey("pkcs8", pair.privateKey);
+  let privateKeyString = btoa(bin.toString(new Uint8Array(privateKey))).match(/.{1,64}/g).join("\n");
+  let publicKey = await window.crypto.subtle.exportKey("spki", pair.publicKey);
+  let publicKeyString = btoa(bin.toString(new Uint8Array(publicKey))).match(/.{1,64}/g).join("\n");
+  return "-----BEGIN PRIVATE KEY-----\n" + privateKeyString +
+    "\n-----END PRIVATE KEY-----\n\n-----BEGIN PUBLIC KEY-----\n" +
+    publicKeyString + "\n-----END PUBLIC KEY-----";
+}
+
+async function sign(privateKey, data) {
+  let ik = await window.crypto.subtle.importKey(
+    "pkcs8", bin.fromString(atob(privateKey)), IMPORT_ALGO, true, ["sign"]);
+  return bin.toSafeBase64(new Uint8Array(await window.crypto.subtle.sign(HASH_ALGO, ik, data)));
+}
+
+async function verify(sig, data) {
+  let ik = await window.crypto.subtle.importKey(
+    "spki", bin.fromString(atob(PUBLIC_KEY)), IMPORT_ALGO, true, ["verify"]);
+  return await window.crypto.subtle.verify(HASH_ALGO, ik, bin.fromSafeBase64(sig), data);
+}
+
+async function validatePrivateKey(privateKey) {
+  try {
+    let data = bin.getRandomBytes(64);
+    return await verify(await sign(privateKey, data), data)
+  }
+  catch (e) {
+    return false;
+  }
+}
+
+async function init() {
+  let params = new URLSearchParams(window.location.search);
+  for (let key of params.keys()) {
+    id(key).value = params.get(key);
+  }
+  if (value("pass").length == 0) {
+    id("pass").focus();
+    if (value("msg").length == 0) {
+      id("html").innerHTML = "<pre>" + await genKeyPair() + "</pre>";
+    }
+  }
+  else {
+    await run(true);
+  }
+}
+
+async function run(ready) {
+  if (ready || event.keyCode == 13) {
+    if (value("pass").length > 0 && value("msg").length == 0) {
+      let privateKey = prompt("PRIVATE KEY?");
+      if (await validatePrivateKey(privateKey)) {
+        let cipher = await encrypt(value("pass"), prompt("MESSAGE?"));
+        let urlBase = window.location.toString().split("?")[0];
+        let url = urlBase + "?msg=" + cipher + "&sig=" + await sign(privateKey, bin.fromString(cipher));
+        id("html").innerHTML = "<a href=\"" + url + "\" target=_blank>" + url + "</a>";
+      }
+      else {
+        alert("PRIVATE KEY ERROR");
+        id("html").innerHTML = "";
+      }
+    }
+    else if(value("pass").length > 0 && value("msg").length > 0) {
+      if (await verify(value("sig"), bin.fromString(value("msg")))) {
+        let plain = "";
+        try {
+          plain = bin.toString(await decrypt(value("pass"), value("msg")));
+        }
+        catch (e) {
+          alert("DECRYPTION ERROR");
+        }
+        id("html").innerHTML = plain;
+      }
+      else {
+        alert("VERIFY ERROR");
+        id("html").innerHTML = "";
+      }
+    }
+  }
+}
+
+</script>
+<style>
+html { font-family: Courier, Monospace; font-size: 16px; }
+body { background-color: #FFFFFF; color: #000000; font-family: inherit; font-size: inherit; }
+input { width: 100%; font-family: inherit; font-size: inherit; }
+textarea { width: 100%; font-family: inherit; font-size: inherit; }
+</style>
+<title>MSG</title>
+</head>
+<body onload="init()">
+<input id="pass" onkeydown="run()" size="20" placeholder="password" type="password" value=""></input>
+<br><br>
+<input id="msg" type="hidden" />
+<input id="sig" type="hidden" />
+<div id="html" />
+</body>
+</html>

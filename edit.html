@@ -1,0 +1,98 @@
+<html>
+<head>
+<script>
+
+function id(i) {
+  return document.getElementById(i);
+}
+
+function filenameInput() {
+  id("process").disabled = (id("filename").value.length == 0);
+}
+
+function clearFile() {
+  id("save").innerHTML = "";
+}
+
+function modified() {
+  id("uploadFile").value = "";
+  clearFile();
+}
+
+function saveFile(fileName, fileData) {
+  clearFile();
+  if (id("uploadFile").value.length > 0) {
+    fileData = id("uploadFile").value;
+  }
+  id("save").href = "data:application/octet-stream;base64," + btoa(fileData);
+  id("save").innerHTML = fileName;
+  id("save").setAttribute("download", fileName);
+}
+
+function process() {
+  if (id("filename").value.length == 0) {
+    return;
+  }
+  var outputFileName = id("filename").value;
+  saveFile(outputFileName, id("txt").value);
+}
+
+function init() {
+  var path = decodeURIComponent(location.pathname);
+  document.title = "Edit";
+  id("heading").innerHTML = document.title;
+  id("filename").value = "";
+  id("process").disabled = true;
+  clearFile();
+  id("upload").addEventListener("change", function() {
+    clearFile();
+    if (this.files.length == 0) {
+      return;
+    }
+    id("txt").value = "";
+    id("process").disabled = false;
+    var file = this.files[0];
+    id("filename").value = file.name;
+    var reader = new FileReader();
+    reader.onload = function() {
+      var result = "";
+      var intArray = new Uint8Array(reader.result);
+      for (var i = 0; i < intArray.length; i++) {
+        result += String.fromCharCode(intArray[i]);
+      }
+      id("txt").value = result;
+      id("uploadFile").value = result;
+    }
+    reader.readAsArrayBuffer(file);
+  });
+  id("filename").focus();
+}
+
+</script>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width">
+<style>
+html { font-family: Courier, Monospace; font-size: 16px; }
+body { background-color: #FFFFFF; color: #000000; font-family: inherit; font-size: inherit; }
+button { width: 30%; font-family: inherit; font-size: inherit; }
+input { width: 65%; font-family: inherit; font-size: inherit; }
+textarea { width: 100%; font-family: inherit; font-size: inherit; }
+</style>
+</head>
+<body onload="init()">
+<input id="uploadFile" type="hidden" />
+<h1 id="heading"></h1>
+<input id="filename" oninput="filenameInput()" placeholder="filename" />
+<button id="process" onclick="process()" type="button">SAVE</button>
+<br>
+<br>
+<a id="save"></a>
+<br>
+<br>
+<input id="upload" type="file" />
+<br>
+<br>
+<textarea id="txt" oninput="modified()" rows="20"></textarea>
+</body>
+</html>

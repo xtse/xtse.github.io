@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Language" content="en_US" />
+<meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width">
+<script>
+
+/* chacha-js (https://github.com/skeeto/chacha-js) */
+
+function ChaCha(key,iv){"use strict";const CHACHA_ROUNDS=20;const CHACHA_KEYSIZE=32;const CHACHA_IVSIZE=8;if(key.byteLength<CHACHA_KEYSIZE)throw new Error("key too short");if(iv.byteLength<CHACHA_IVSIZE)throw new Error("IV too short");const state=new Uint32Array(16);let view=new DataView(key);state[0]=1634760805;state[1]=857760878;state[2]=2036477234;state[3]=1797285236;state[4]=view.getUint32(0,true);state[5]=view.getUint32(4,true);state[6]=view.getUint32(8,true);state[7]=view.getUint32(12,true);state[8]=view.getUint32(16,true);state[9]=view.getUint32(20,true);state[10]=view.getUint32(24,true);state[11]=view.getUint32(28,true);view=new DataView(iv);state[14]=view.getUint32(0,true);state[15]=view.getUint32(4,true);const output=new Uint32Array(16);const outview=new DataView(output.buffer);return function(){function quarterround(x,a,b,c,d){function rotate(v,n){return v<<n|v>>>32-n}x[a]+=x[b];x[d]=rotate(x[d]^x[a],16);x[c]+=x[d];x[b]=rotate(x[b]^x[c],12);x[a]+=x[b];x[d]=rotate(x[d]^x[a],8);x[c]+=x[d];x[b]=rotate(x[b]^x[c],7)}output.set(state);for(let i=0;i<CHACHA_ROUNDS;i+=2){quarterround(output,0,4,8,12);quarterround(output,1,5,9,13);quarterround(output,2,6,10,14);quarterround(output,3,7,11,15);quarterround(output,0,5,10,15);quarterround(output,1,6,11,12);quarterround(output,2,7,8,13);quarterround(output,3,4,9,14)}for(let i=0;i<16;i++)outview.setUint32(i*4,output[i]+state[i],true);state[12]++;if(state[12]==0){state[13]++;if(state[13]==0){throw new Error("output exhausted")}}return output.buffer}}function ChaCha20(key,iv){let chacha=new ChaCha(key.buffer,iv.buffer);let buffer=new Uint8Array(chacha());let bufferIndex=0;return function(size){let result=new Uint8Array(size);for(let resultIndex=0;resultIndex<size;resultIndex++){if(bufferIndex==64){buffer=new Uint8Array(chacha());bufferIndex=0}result[resultIndex]=buffer[bufferIndex];bufferIndex++}return result}}
+
+/* bin.js 2023-09-22 */
+
+var bin=new bintools;function bintools(){}bintools.prototype.assert=function(assertion){if(!(assertion===true)){console.trace();throw"ERROR"}};bintools.prototype.toHex=function(arr){this.assert(arr instanceof Uint8Array);return arr.reduce(((hex,b)=>hex+b.toString(16).padStart(2,"0")),"")};bintools.prototype.fromHex=function(txt){this.assert(typeof txt==="string");let hex=txt.replace(/[^a-fA-f0-9]/g,"");this.assert(hex.length%2==0);return new Uint8Array(hex.match(/.{1,2}/g).map((b=>parseInt(b,16))))};bintools.prototype.toBase64=function(arr){this.assert(arr instanceof Uint8Array);return btoa(this.toString(arr))};bintools.prototype.fromBase64=function(txt){this.assert(typeof txt==="string");return this.fromString(atob(txt))};bintools.prototype.toSafeBase64=function(arr){this.assert(arr instanceof Uint8Array);return this.toBase64(arr).replace(/\//g,"_").replace(/\+/g,"-").replace(/\=/g,"")};bintools.prototype.fromSafeBase64=function(txt){this.assert(typeof txt==="string");return this.fromBase64(txt.replace(/_/g,"/").replace(/-/g,"+"))};bintools.prototype.toString=function(arr){this.assert(arr instanceof Uint8Array);let result="";for(let i=0;i<arr.length;i++)result+=String.fromCharCode(arr[i]);return result};bintools.prototype.fromString=function(txt){this.assert(typeof txt==="string");return new Uint8Array(txt.split("").map((s=>s.charCodeAt(0))))};bintools.prototype.getRandomBytes=function(size){this.assert(typeof size==="number"&&size>0);let randomBytes=new Uint8Array(size);if(size<=65536){window.crypto.getRandomValues(randomBytes)}else{let buf=new Uint8Array(65536);let bufIndex=0;window.crypto.getRandomValues(buf);for(let i=0;i<size;i++){if(bufIndex==buf.length){bufIndex=0;window.crypto.getRandomValues(buf)}randomBytes[i]=buf[bufIndex];bufIndex++}}return randomBytes};bintools.prototype.getRandomGuid=function(){let s=this.toHex(this.getRandomBytes(16));return s.substring(0,8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20)};bintools.prototype.xor=function(...baArray){this.assert(baArray.length>1);let length=-1;for(let ba of baArray){if(length==-1)length=ba.length;this.assert(ba instanceof Uint8Array);this.assert(ba.length==length)}let result=new Uint8Array(length);let ba=baArray[0];for(let i=0;i<length;i++)result[i]=ba[i];for(let i=1;i<baArray.length;i++){ba=baArray[i];for(let j=0;j<length;j++){result[j]=result[j]^ba[j]}}return result};bintools.prototype.merge=function(...baArray){this.assert(baArray.length>1);let count=0;let size=0;for(let ba of baArray){this.assert(ba instanceof Uint8Array);size+=ba.length}let result=new Uint8Array(size);for(let ba of baArray){result.set(ba,count);count+=ba.length}return result};
+
+function id(i) {
+  return document.getElementById(i);
+}
+
+function value(i) {
+  return id(i).value.trim();
+}
+
+function timestamp() {
+  let date = new Date();
+  return date.getFullYear().toString() +
+    (date.getMonth() + 1).toString().padStart(2, "0") +
+    date.getDate().toString().padStart(2, "0") + "-" +
+    date.getHours().toString().padStart(2, "0") +
+    date.getMinutes().toString().padStart(2, "0") +
+    date.getSeconds().toString().padStart(2, "0");
+}
+
+function reset() {
+  id("text").value = "";
+  id("save").disabled = true;
+}
+
+function revoke() {
+  URL.revokeObjectURL(id("download").href);
+  id("download").setAttribute("download", "");
+  id("download").href = "";
+}
+
+async function copy() {
+  id("copy").disabled = true;
+  await navigator.clipboard.writeText(value("text"));
+  setTimeout(function() { id("copy").disabled = false; }, 500);
+}
+
+async function sha256(data) {
+  return new Uint8Array(await window.crypto.subtle.digest("SHA-256", data));
+}
+
+async function pbkdf2(pass, salt, iterations) {
+  let ik = await window.crypto.subtle.importKey("raw", pass, "PBKDF2", false, ["deriveBits"]);
+  let params = { name: "PBKDF2", salt: salt, iterations: iterations, hash: "SHA-256" };
+  return new Uint8Array(await window.crypto.subtle.deriveBits(params, ik, 256));
+}
+
+async function keyinput() {
+  let key = value("key");
+  let keyhash = bin.toHex(await sha256(bin.fromString(key))).toUpperCase().substring(0, 2);
+  id("heading").innerHTML = (key.length < 8) ? document.title : document.title + " (" + keyhash + ")";
+  id("encrypt").disabled = (key.length == 0);
+  id("decrypt").disabled = (key.length == 0);
+}
+
+function textinput() {
+  id("save").disabled = true;
+}
+
+async function encryptChaCha(key, data) {
+  let plain = data;
+  let nonce = bin.getRandomBytes(4);
+  let dk = await pbkdf2(key, nonce, 100 * 1000);
+  let checksum = (await sha256(bin.merge(dk, await sha256(plain)))).slice(0, 2);
+  let chacha20 = new ChaCha20(await sha256(bin.merge(dk, checksum)), new Uint8Array(8));
+  let cipher = bin.xor(plain, chacha20(plain.length));
+  return bin.merge(checksum, nonce, cipher);
+}
+
+async function decryptChaCha(key, data) {
+  let expectedChecksum = data.slice(0, 2);
+  let nonce = data.slice(2, 6);
+  let cipher = data.slice(6);
+  let dk = await pbkdf2(key, nonce, 100 * 1000);
+  let chacha20 = new ChaCha20(await sha256(bin.merge(dk, expectedChecksum)), new Uint8Array(8));
+  let plain = bin.xor(cipher, chacha20(cipher.length));
+  let actualChecksum = (await sha256(bin.merge(dk, await sha256(plain)))).slice(0, 2);
+  if (bin.toHex(expectedChecksum) == bin.toHex(actualChecksum)) {
+    return plain;
+  }
+  else {
+    throw new Error();
+  }
+}
+
+async function encrypt() {
+  id("encrypt").disabled = true;
+  let cipher = await encryptChaCha(bin.fromString(value("key")), bin.fromString(value("text")));
+  id("text").value = (value("format") == "hex") ? bin.toHex(cipher) : bin.toSafeBase64(cipher);
+  id("encrypt").disabled = false;
+  id("save").disabled = false;
+}
+
+async function decrypt() {
+  id("decrypt").disabled = true;
+  try {
+    let cipher = (value("format") == "hex") ? bin.fromHex(value("text")) : bin.fromSafeBase64(value("text"));
+    id("text").value = bin.toString(await decryptChaCha(bin.fromString(value("key")), cipher));
+    id("save").disabled = true;
+  }
+  catch (e) {
+    alert("DECRYPTION ERROR");
+  }
+  id("decrypt").disabled = false;
+}
+
+async function exec(mode) {
+  id("status").innerHTML = "PROCESSING";
+  let t = Date.now();
+  if (mode == "encrypt") {
+    await encrypt();
+  }
+  else if (mode == "decrypt") {
+    await decrypt();
+  }
+  id("status").innerHTML = (Date.now() - t) + " ms";
+}
+
+function save() {
+  revoke();
+  let files = id("upload").files;
+  let prefix = files.length == 0 ? "file" : files[0].name.split(".").shift().split("-").shift();
+  let fileName = prefix + "-" + timestamp() + ".cha";
+  let fileData = bin.fromSafeBase64(value("text"));
+  id("download").href = URL.createObjectURL(new Blob([fileData], { type: "application/octet-stream" }));
+  id("download").setAttribute("download", fileName);
+  id("download").click();
+}
+
+async function init() {
+  id("heading").innerHTML = document.title = "ChaCha";
+  id("status").innerHTML = "READY";
+  id("format").value = id("key").value = id("text").value = "";
+  id("save").disabled = true;
+  if (!navigator.clipboard) {
+    id("copy").disabled = true;
+  }
+  revoke();
+  let params = new URLSearchParams(window.location.search);
+  for (let k of params.keys()) { if (id(k)) id(k).value = params.get(k); }
+  id("text").rows = id("rows").value > 0 && id("rows").value < 100 ? id("rows").value : 15;
+  await keyinput();
+  if (params.has("mode")) {
+    id(params.get("mode")).click();
+  }
+  id("key").focus();
+  id("upload").addEventListener("change", function() {
+    id("text").value = "";
+    id("save").disabled = true;
+    if (this.files.length == 0 || !this.files[0].name.toLowerCase().endsWith(".cha")) {
+      id("upload").value = "";
+      return;
+    }
+    let file = this.files[0];
+    let reader = new FileReader();
+    reader.onload = async function() {
+      id("text").value = bin.toSafeBase64(new Uint8Array(reader.result));
+    }
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+</script>
+<style>
+html { font-family: Courier, Monospace; font-size: 16px; }
+body { background-color: #FFFFFF; color: #000000; font-family: inherit; font-size: inherit; }
+button { width: 15%; font-family: inherit; font-size: 10px; }
+input { width: 45%; font-family: inherit; font-size: inherit; }
+textarea { width: 95%; font-family: inherit; font-size: inherit; }
+</style>
+</head>
+<body onload="init()">
+<h2 id="heading"></h2>
+<input id="format" type="hidden" />
+<input id="rows" type="hidden" />
+<input id="key" oninput="keyinput()" placeholder="key" size="10" type="password" />
+<input id="upload" type="file" /><br><br>
+<textarea id="text" oninput="textinput()" placeholder="text"></textarea><br><br>
+<button id="encrypt" onclick="exec('encrypt')" type="button">ENCRYPT</button>
+<button id="decrypt" onclick="exec('decrypt')" type="button">DECRYPT</button> |
+<button id="clear" onclick="reset()" type="button">CLEAR</button>
+<button id="copy" onclick="copy()" type="button">COPY</button> |
+<button id="save" onclick="save()" type="button">SAVE</button><br><br>
+<i id="status"></i>
+<a hidden id="download"></a>
+</body>
+</html>
